@@ -1,1 +1,4 @@
-*.pdf 
+*.pdf
+.DS_Store
+.cursor/
+backend/venv/ 
