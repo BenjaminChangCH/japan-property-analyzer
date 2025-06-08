@@ -33,8 +33,4 @@ steps:
 
 # 設定觸發條件：當推送到非 main 分支時觸發
 options:
-  logging: CLOUD_LOGGING_ONLY
-
-# 替代變數
-substitutions:
-  _SERVICE_NAME: japan-property-analyzer 
+  logging: CLOUD_LOGGING_ONLY 
