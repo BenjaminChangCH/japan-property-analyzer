@@ -18,7 +18,7 @@ ENVIRONMENT=staging|production
 
 ## CI/CD 部署流程
 
-### STG 環境部署
+### STG 環境部署 ✅ 已完成
 1. 推送到任何非 `main` 分支
 2. 觸發 `cloudbuild-staging.yaml`
 3. 部署到 `japan-property-analyzer` (STG)
@@ -51,5 +51,18 @@ gcloud builds submit --config cloudbuild-production.yaml
 
 ## 環境 URL
 
-- **STG**: https://japan-property-analyzer-[hash]-an.a.run.app
-- **PRD**: https://japan-property-analyzer-prod-[hash]-an.a.run.app 
+- **STG**: https://japan-property-analyzer-864942598341.asia-northeast1.run.app ✅ 已部署
+- **PRD**: https://japan-property-analyzer-prod-[hash]-an.a.run.app
+
+## 最新部署狀態
+
+### STG 環境 ✅
+- 部署時間: 2025-06-08T18:26:18.179986Z
+- 狀態: 運行中
+- 權限: 公開存取 (allUsers)
+- GA 追蹤: 已啟用
+
+### 下一步
+- 在 STG 環境測試 GA 追蹤功能
+- 確認所有事件正確觸發後，合併 PR 到 main 分支
+- 部署到生產環境 

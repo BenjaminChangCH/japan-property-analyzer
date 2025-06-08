@@ -3,7 +3,6 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'build', 
-      '-t', 'gcr.io/$PROJECT_ID/japan-property-analyzer:$SHORT_SHA',
       '-t', 'gcr.io/$PROJECT_ID/japan-property-analyzer:latest',
       '.'
     ]
@@ -12,7 +11,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: [
       'push', 
-      'gcr.io/$PROJECT_ID/japan-property-analyzer:$SHORT_SHA'
+      'gcr.io/$PROJECT_ID/japan-property-analyzer:latest'
     ]
 
   # 部署到 Cloud Run (STG 環境)
@@ -20,7 +19,7 @@ steps:
     entrypoint: gcloud
     args: [
       'run', 'deploy', 'japan-property-analyzer',
-      '--image', 'gcr.io/$PROJECT_ID/japan-property-analyzer:$SHORT_SHA',
+      '--image', 'gcr.io/$PROJECT_ID/japan-property-analyzer:latest',
       '--region', 'asia-northeast1',
       '--platform', 'managed',
       '--allow-unauthenticated',
