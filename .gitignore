@@ -31,4 +31,8 @@ ENV/
 
 # 暫存檔案
 .tmp/
-temp/ 
+temp/
+
+# 測試相關檔案 (但保留測試腳本和報告)
+# test_*.py  # 保留測試腳本
+# *_TEST_REPORT.md  # 保留測試報告 
