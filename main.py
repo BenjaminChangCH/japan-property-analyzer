@@ -8,7 +8,13 @@ CORS(app) # 允許跨域請求
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    # 根據環境變數決定 GA 追蹤 ID
+    ga_tracking_id = os.environ.get('GA_TRACKING_ID', '')
+    environment = os.environ.get('ENVIRONMENT', 'development')
+    
+    return render_template('index.html', 
+                         ga_tracking_id=ga_tracking_id,
+                         environment=environment)
 
 @app.route('/static/<path:path>')
 def send_static(path):

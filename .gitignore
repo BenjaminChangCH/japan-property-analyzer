@@ -1,4 +1,34 @@
 *.pdf
 .DS_Store
 .cursor/
-backend/venv/ 
+backend/venv/
+
+# 環境變數檔案
+.env
+.env.local
+.env.staging
+.env.production
+
+# Python 相關
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+venv/
+.venv/
+env/
+ENV/
+
+# IDE 相關
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日誌檔案
+*.log
+
+# 暫存檔案
+.tmp/
+temp/ 

@@ -4,6 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>日本不動產投資與商業模式財務分析</title>
+    
+    <!-- Google Analytics 4 -->
+    {% if ga_tracking_id %}
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ ga_tracking_id }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        
+        // GA4 基本設定
+        var gaConfig = {
+            page_title: '日本不動產投資分析工具',
+            page_location: window.location.href
+        };
+        
+        {% if environment == 'development' %}
+        gaConfig.debug_mode = true;
+        {% endif %}
+        
+        gtag('config', '{{ ga_tracking_id }}', gaConfig);
+        
+        // 追蹤環境資訊
+        gtag('event', 'page_view', {
+            environment: '{{ environment }}',
+            app_name: 'Japan Property Analyzer'
+        });
+    </script>
+    {% endif %}
+    
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -1071,6 +1101,17 @@
 
             calculateBtn.addEventListener('click', async () => {
                 try {
+                    // GA4 事件追蹤 - 開始計算
+                    {% if ga_tracking_id %}
+                    gtag('event', 'calculation_started', {
+                        event_category: 'engagement',
+                        event_label: 'property_analysis',
+                        monetization_model: document.getElementById('monetizationModel').value,
+                        purchase_type: document.getElementById('purchaseType').value,
+                        property_price: unformatNumber(document.getElementById('propertyPrice').value)
+                    });
+                    {% endif %}
+                    
                     // 收集所有輸入參數
                     const inputParams = {
                         monetizationModel: document.getElementById('monetizationModel').value,
@@ -1134,6 +1175,16 @@
                         generateSuggestions(results);
                         resultsContainer.classList.remove('hidden');
                         downloadBtn.classList.remove('hidden');
+                        
+                        // GA4 事件追蹤 - 計算完成
+                        {% if ga_tracking_id %}
+                        gtag('event', 'calculation_completed', {
+                            event_category: 'engagement',
+                            event_label: 'property_analysis_success',
+                            total_investment: results.totalInitialInvestment,
+                            monthly_revenue: results.monthlyNetRevenue
+                        });
+                        {% endif %}
                     }
                 } catch (e) {
                     console.error("Calculation Error:", e);
@@ -1142,6 +1193,15 @@
             });
 
             downloadBtn.addEventListener('click', () => {
+                // GA4 事件追蹤 - PDF 下載
+                {% if ga_tracking_id %}
+                gtag('event', 'pdf_download', {
+                    event_category: 'engagement',
+                    event_label: 'report_download',
+                    file_name: '日本不動產財務分析報告.pdf'
+                });
+                {% endif %}
+                
                 const report = document.getElementById('reportToPrint');
                 const btnGroup = report.querySelector('.btn-group');
                 btnGroup.style.display = 'none';
