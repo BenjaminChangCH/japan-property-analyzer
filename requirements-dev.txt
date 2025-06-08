@@ -1,0 +1,19 @@
+# 開發環境依賴套件
+-r requirements.txt
+
+# 程式碼品質工具
+flake8==6.0.0
+black==23.3.0
+pylint==2.17.4
+
+# 測試工具
+pytest==7.3.1
+pytest-cov==4.1.0
+pytest-mock==3.10.0
+
+# 自動化測試
+selenium==4.10.0
+requests==2.31.0
+
+# 開發工具
+python-dotenv==1.0.0 
