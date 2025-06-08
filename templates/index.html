@@ -1069,9 +1069,66 @@
             propertyTypeSelect.addEventListener('change', updateDefaults);
             locationSelect.addEventListener('change', updateDefaults);
 
-            calculateBtn.addEventListener('click', () => {
+            calculateBtn.addEventListener('click', async () => {
                 try {
-                    const results = calculateInvestment();
+                    // 收集所有輸入參數
+                    const inputParams = {
+                        monetizationModel: document.getElementById('monetizationModel').value,
+                        purchaseType: document.getElementById('purchaseType').value,
+                        propertyPrice: unformatNumber(document.getElementById('propertyPrice').value),
+                        downPaymentRatio: unformatNumber(document.getElementById('downPaymentRatio').value),
+                        acquisitionCostRatio: unformatNumber(document.getElementById('acquisitionCostRatio').value),
+                        exchangeRate: unformatNumber(document.getElementById('exchangeRate').value),
+                        loanOrigin: document.getElementById('loanOrigin').value,
+                        initialFurnishingCost: unformatNumber(document.getElementById('initialFurnishingCost').value),
+                        japanLoanInterestRate: unformatNumber(document.getElementById('japanLoanInterestRate').value),
+                        japanLoanTerm: unformatNumber(document.getElementById('japanLoanTerm').value),
+                        taiwanLoanInterestRate: unformatNumber(document.getElementById('taiwanLoanInterestRate').value),
+                        taiwanLoanTerm: unformatNumber(document.getElementById('taiwanLoanTerm').value),
+                        creditLoanRate: unformatNumber(document.getElementById('creditLoanRate').value),
+                        managementFeeRatio: unformatNumber(document.getElementById('managementFeeRatio').value),
+                        propertyTaxRate: unformatNumber(document.getElementById('propertyTaxRate').value),
+                        annualAppreciation: unformatNumber(document.getElementById('annualAppreciation').value),
+                        investmentPeriod: unformatNumber(document.getElementById('investmentPeriod').value),
+                        buildingStructure: document.getElementById('buildingStructure').value,
+                        buildingRatio: unformatNumber(document.getElementById('buildingRatio').value),
+                        corporateTaxRate: unformatNumber(document.getElementById('corporateTaxRate').value),
+                        annualInsuranceCost: unformatNumber(document.getElementById('annualInsuranceCost').value),
+                        corporateSetupCost: unformatNumber(document.getElementById('corporateSetupCost').value),
+                        annualTaxAccountantFee: unformatNumber(document.getElementById('annualTaxAccountantFee').value),
+                        ownCapitalAmount: unformatNumber(document.getElementById('ownCapitalAmount').value),
+                        
+                        // Airbnb 參數
+                        operatingDaysCap: unformatNumber(document.getElementById('operatingDaysCap').value),
+                        occupancyRate: unformatNumber(document.getElementById('occupancyRate').value),
+                        dailyRate: unformatNumber(document.getElementById('dailyRate').value),
+                        platformFeeRate: unformatNumber(document.getElementById('platformFeeRate').value),
+                        cleaningFee: unformatNumber(document.getElementById('cleaningFee').value),
+                        avgStayDuration: unformatNumber(document.getElementById('avgStayDuration').value),
+                        avgGuests: unformatNumber(document.getElementById('avgGuests').value),
+                        baseOccupancyForFee: unformatNumber(document.getElementById('baseOccupancyForFee').value),
+                        extraGuestFee: unformatNumber(document.getElementById('extraGuestFee').value),
+                        peakSeasonMarkup: unformatNumber(document.getElementById('peakSeasonMarkup').value),
+                        monthlyUtilities: unformatNumber(document.getElementById('monthlyUtilities').value),
+
+                        // 個人長租參數
+                        monthlyRent: unformatNumber(document.getElementById('monthlyRent').value),
+                        vacancyRate: unformatNumber(document.getElementById('vacancyRate').value),
+                        initialLeaseCostsRatio: unformatNumber(document.getElementById('initialLeaseCostsRatio').value),
+                        leaseUtilities: unformatNumber(document.getElementById('leaseUtilities').value),
+                        leaseRenewalFeeFrequency: unformatNumber(document.getElementById('leaseRenewalFeeFrequency').value),
+                        leaseRenewalFeeAmount: unformatNumber(document.getElementById('leaseRenewalFeeAmount').value),
+
+                        // 店鋪出租參數
+                        monthlyRentCommercial: unformatNumber(document.getElementById('monthlyRentCommercial').value),
+                        vacancyRateCommercial: unformatNumber(document.getElementById('vacancyRateCommercial').value),
+                        initialLeaseCostsRatioCommercial: unformatNumber(document.getElementById('initialLeaseCostsRatioCommercial').value),
+                        leaseTermCommercial: unformatNumber(document.getElementById('leaseTermCommercial').value)
+                    };
+
+                    // 模擬 API 呼叫
+                    const results = await mockBackendCalculation(inputParams);
+
                     if (results) {
                         updateUI(results);
                         generateSuggestions(results);
@@ -1154,224 +1211,29 @@
                 formatAllNumberInputs();
             }
 
-            function calculateInvestment() {
-                const MAN_EN = 10000;
-                const monetizationModel = document.getElementById('monetizationModel').value;
-                const purchaseType = document.getElementById('purchaseType').value;
-                const propertyPrice = parseFloat(unformatNumber(document.getElementById('propertyPrice').value)) * MAN_EN;
-                const downPaymentRatio = parseFloat(unformatNumber(document.getElementById('downPaymentRatio').value)) / 100;
-                const acquisitionCostRatio = parseFloat(unformatNumber(document.getElementById('acquisitionCostRatio').value)) / 100;
-                const exchangeRate = parseFloat(unformatNumber(document.getElementById('exchangeRate').value));
-                const loanOrigin = document.getElementById('loanOrigin').value;
-                const initialFurnishingCost = (parseFloat(unformatNumber(document.getElementById('initialFurnishingCost').value)) || 0) * MAN_EN;
+            // 模擬後端計算函式
+            async function mockBackendCalculation(params) {
+                // 實際情況下，這裡會是一個 fetch() 呼叫到後端 API
+                try {
+                    const response = await fetch('/calculate', {
+                    method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(params),
+                    });
 
-                let loanInterestRate = 0,
-                    loanTerm = 0;
-                if (loanOrigin === 'japan' || loanOrigin === 'mixed') {
-                    loanInterestRate = parseFloat(unformatNumber(document.getElementById('japanLoanInterestRate').value)) / 100;
-                    loanTerm = parseInt(unformatNumber(document.getElementById('japanLoanTerm').value));
-                } else if (loanOrigin === 'taiwan') {
-                    loanInterestRate = parseFloat(unformatNumber(document.getElementById('taiwanLoanInterestRate').value)) / 100;
-                    loanTerm = parseInt(unformatNumber(document.getElementById('taiwanLoanTerm').value));
-                }
-                const creditLoanRate = parseFloat(unformatNumber(document.getElementById('creditLoanRate').value)) / 100;
-                const managementFeeRatio = parseFloat(unformatNumber(document.getElementById('managementFeeRatio').value)) / 100;
-                const propertyTaxRate = parseFloat(unformatNumber(document.getElementById('propertyTaxRate').value)) / 100;
-                const annualAppreciation = parseFloat(unformatNumber(document.getElementById('annualAppreciation').value)) / 100;
-                const investmentPeriod = parseInt(unformatNumber(document.getElementById('investmentPeriod').value));
-                const buildingStructure = document.getElementById('buildingStructure').value;
-                const buildingRatio = parseFloat(unformatNumber(document.getElementById('buildingRatio').value)) / 100;
-                const corporateTaxRate = parseFloat(unformatNumber(document.getElementById('corporateTaxRate').value)) / 100;
-                const annualInsuranceCost = (parseFloat(unformatNumber(document.getElementById('annualInsuranceCost').value)) || 0) * MAN_EN;
-                const corporateSetupCost = (purchaseType === 'corporate') ? ((parseFloat(unformatNumber(document.getElementById('corporateSetupCost').value)) || 0) * MAN_EN) : 0;
-                const annualTaxAccountantFee = (purchaseType === 'corporate') ? ((parseFloat(unformatNumber(document.getElementById('annualTaxAccountantFee').value)) || 0) * MAN_EN) : 0;
-
-                const totalUpfrontCosts = propertyPrice * acquisitionCostRatio;
-                const totalCost = propertyPrice + totalUpfrontCosts;
-                const downPaymentAmount = propertyPrice * downPaymentRatio;
-                const loanAmount = propertyPrice - downPaymentAmount;
-
-                let ownCapitalForDownPaymentAmount;
-                let creditLoanForDownPaymentAmount;
-
-                if (loanOrigin === 'mixed') {
-                    const ownCapitalAmountInput = (parseFloat(unformatNumber(document.getElementById('ownCapitalAmount').value)) || 0) * MAN_EN;
-                    ownCapitalForDownPaymentAmount = Math.min(ownCapitalAmountInput, downPaymentAmount);
-                    creditLoanForDownPaymentAmount = downPaymentAmount - ownCapitalForDownPaymentAmount;
-                } else {
-                    ownCapitalForDownPaymentAmount = downPaymentAmount;
-                    creditLoanForDownPaymentAmount = 0;
-                }
-
-                const totalInitialInvestment = ownCapitalForDownPaymentAmount + totalUpfrontCosts + initialFurnishingCost + corporateSetupCost;
-
-                let monthlyGrossRevenue = 0,
-                    monthlyOperatingExpenses = 0,
-                    oneTimeInitialIncome = 0,
-                    annualRenewalFee = 0;
-                if (monetizationModel === 'airbnb') {
-                    const operatingDaysCap = parseInt(unformatNumber(document.getElementById('operatingDaysCap').value)),
-                        occupancyRate = parseFloat(unformatNumber(document.getElementById('occupancyRate').value)) / 100,
-                        dailyRate = parseFloat(unformatNumber(document.getElementById('dailyRate').value)),
-                        platformFeeRate = parseFloat(unformatNumber(document.getElementById('platformFeeRate').value)) / 100,
-                        cleaningFee = parseFloat(unformatNumber(document.getElementById('cleaningFee').value)) * MAN_EN,
-                        avgStayDuration = parseFloat(unformatNumber(document.getElementById('avgStayDuration').value)),
-                        avgGuests = parseFloat(unformatNumber(document.getElementById('avgGuests').value)),
-                        baseOccupancyForFee = parseFloat(unformatNumber(document.getElementById('baseOccupancyForFee').value)),
-                        extraGuestFee = parseFloat(unformatNumber(document.getElementById('extraGuestFee').value)) * MAN_EN,
-                        peakSeasonMarkup = parseFloat(unformatNumber(document.getElementById('peakSeasonMarkup').value)) / 100,
-                        monthlyUtilities = parseFloat(unformatNumber(document.getElementById('monthlyUtilities').value)) * MAN_EN;
-                    const annualBookedNights = operatingDaysCap * occupancyRate,
-                        monthlyBookedNights = annualBookedNights / 12;
-                    const totalEffectiveADR = dailyRate * (1 + peakSeasonMarkup * 3 / 12) + Math.max(0, avgGuests - baseOccupancyForFee) * extraGuestFee;
-                    monthlyGrossRevenue = monthlyBookedNights * totalEffectiveADR;
-                    const turnoversPerMonth = avgStayDuration > 0 ? monthlyBookedNights / avgStayDuration : 0;
-                    monthlyOperatingExpenses = monthlyGrossRevenue * platformFeeRate + turnoversPerMonth * cleaningFee + monthlyUtilities;
-                } else {
-                    let monthlyRent, vacancyRate, initialRatio, leaseUtilities;
-                    if (monetizationModel === 'personalLease') {
-                        monthlyRent = parseFloat(unformatNumber(document.getElementById('monthlyRent').value)) * MAN_EN;
-                        vacancyRate = parseFloat(unformatNumber(document.getElementById('vacancyRate').value)) / 100;
-                        initialRatio = parseFloat(unformatNumber(document.getElementById('initialLeaseCostsRatio').value));
-                        leaseUtilities = parseFloat(unformatNumber(document.getElementById('leaseUtilities').value)) * MAN_EN;
-                        const leaseRenewalFeeFrequency = parseFloat(unformatNumber(document.getElementById('leaseRenewalFeeFrequency').value)) || 2;
-                        const leaseRenewalFeeAmount = parseFloat(unformatNumber(document.getElementById('leaseRenewalFeeAmount').value)) || 0;
-                        annualRenewalFee = (leaseRenewalFeeFrequency > 0 && leaseRenewalFeeAmount > 0) ? (monthlyRent * leaseRenewalFeeAmount) / leaseRenewalFeeFrequency : 0;
-                    } else { // Commercial Lease
-                        monthlyRent = parseFloat(unformatNumber(document.getElementById('monthlyRentCommercial').value)) * MAN_EN;
-                        vacancyRate = parseFloat(unformatNumber(document.getElementById('vacancyRateCommercial').value)) / 100;
-                        initialRatio = parseFloat(unformatNumber(document.getElementById('initialLeaseCostsRatioCommercial').value));
-                        leaseUtilities = 0; // Typically tenant pays utilities for commercial
-                    }
-                    monthlyGrossRevenue = monthlyRent * (1 - vacancyRate);
-                    oneTimeInitialIncome = monthlyRent * initialRatio;
-                    monthlyOperatingExpenses = leaseUtilities;
-                }
-
-                const monthlyNetRevenue = monthlyGrossRevenue - monthlyOperatingExpenses;
-                const monthlyPayment = loanAmount > 0 && loanTerm > 0 && loanInterestRate > 0 ? loanAmount * (loanInterestRate / 12 * Math.pow(1 + loanInterestRate / 12, loanTerm * 12)) / (Math.pow(1 + loanInterestRate / 12, loanTerm * 12) - 1) : (loanAmount > 0 && loanTerm > 0 ? loanAmount / (loanTerm * 12) : 0);
-                const creditLoanPayment = (creditLoanForDownPaymentAmount > 0) ? creditLoanForDownPaymentAmount * (creditLoanRate / 12 * Math.pow(1 + creditLoanRate / 12, 60)) / (Math.pow(1 + creditLoanRate / 12, 60) - 1) : 0;
-                const monthlyManagementAndRepairs = monthlyGrossRevenue * managementFeeRatio;
-                const monthlyPropertyTax = (propertyPrice * propertyTaxRate) / 12;
-                const totalAnnualExpenses = (monthlyPayment + creditLoanPayment + monthlyManagementAndRepairs + monthlyPropertyTax) * 12 + annualInsuranceCost + annualTaxAccountantFee;
-
-                let cashFlows = [-totalInitialInvestment];
-                let remainingLoan = loanAmount;
-                const annualDepreciation = (propertyPrice * buildingRatio) / (buildingStructure === 'wood' ? 22 : 47);
-                let annualTax_y1 = 0, annualTax_y2 = 0;
-
-
-                for (let year = 1; year <= investmentPeriod; year++) {
-                    const leaseRenewalFeeFrequency = parseFloat(unformatNumber(document.getElementById('leaseRenewalFeeFrequency').value)) || 2;
-                    const isRenewalYear = (monetizationModel === 'personalLease' && annualRenewalFee > 0 && year > 0 && year % leaseRenewalFeeFrequency === 0);
-                    const currentYearRenewalFee = isRenewalYear ? annualRenewalFee * leaseRenewalFeeFrequency : 0;
-
-                    const annualIncome = monthlyNetRevenue * 12 + (year === 1 ? oneTimeInitialIncome : 0) + currentYearRenewalFee;
-
-                    let annualInterestPaid = 0,
-                        annualCreditInterestPaid = 0;
-
-                    if (remainingLoan > 0 && monthlyPayment > 0) {
-                        for (let m = 0; m < 12; m++) {
-                            let interest = remainingLoan * (loanInterestRate / 12);
-                            annualInterestPaid += interest;
-                            let principal = monthlyPayment - interest;
-                            remainingLoan -= principal;
-                        }
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
-                    let postTaxAnnualCashFlow = annualIncome - totalAnnualExpenses;
-
-                    if (purchaseType === 'corporate') {
-                        const annualManagementAndRepairsValue = monthlyManagementAndRepairs * 12;
-                        const annualPropertyTaxValue = monthlyPropertyTax * 12;
-                        const taxableIncome = (monthlyGrossRevenue * 12 + (year === 1 ? oneTimeInitialIncome : 0) + currentYearRenewalFee) -
-                            (monthlyOperatingExpenses * 12) -
-                            annualInterestPaid -
-                            annualCreditInterestPaid -
-                            annualManagementAndRepairsValue -
-                            annualPropertyTaxValue -
-                            annualInsuranceCost -
-                            annualTaxAccountantFee -
-                            annualDepreciation;
-                        const annualTax = taxableIncome > 0 ? taxableIncome * corporateTaxRate : 0;
-                        if(year === 1) annualTax_y1 = annualTax;
-                        if(year === 2) annualTax_y2 = annualTax;
-                        postTaxAnnualCashFlow -= annualTax;
-                    }
-
-                    if (year === investmentPeriod) {
-                        const currentPropertyValue = propertyPrice * Math.pow(1 + annualAppreciation, year);
-                        const sellingCosts = currentPropertyValue * 0.03;
-
-                        let finalLoanBalance = loanAmount;
-                        if (loanAmount > 0 && monthlyPayment > 0) {
-                            for (let y = 0; y < investmentPeriod; y++) {
-                                if (finalLoanBalance <= 0) break;
-                                for (let m = 0; m < 12; m++) {
-                                    const interest = finalLoanBalance * (loanInterestRate / 12);
-                                    const principal = monthlyPayment - interest;
-                                    finalLoanBalance -= principal;
-                                }
-                            }
-                        }
-                        finalLoanBalance = Math.max(0, finalLoanBalance);
-
-                        let capitalGainsTax = 0;
-                        if (purchaseType === 'corporate') {
-                            const accumulatedDepreciation = annualDepreciation * investmentPeriod;
-                            const buildingBookValue = (propertyPrice * buildingRatio) - accumulatedDepreciation;
-                            const landValue = propertyPrice * (1 - buildingRatio);
-                            const bookValue = buildingBookValue + landValue;
-                            const capitalGain = currentPropertyValue - bookValue - sellingCosts;
-                            if (capitalGain > 0) {
-                                capitalGainsTax = capitalGain * corporateTaxRate;
-                            }
-                        } else { // Individual
-                            const capitalGain = currentPropertyValue - (propertyPrice + totalUpfrontCosts);
-                            if (capitalGain > 0) {
-                                capitalGainsTax = capitalGain * (investmentPeriod >= 5 ? 0.20315 : 0.3963);
-                            }
-                        }
-
-                        const netSaleProceeds = currentPropertyValue - sellingCosts - finalLoanBalance - capitalGainsTax;
-                        cashFlows.push(postTaxAnnualCashFlow + netSaleProceeds);
-                    } else {
-                        cashFlows.push(postTaxAnnualCashFlow);
-                    }
+                    const results = await response.json();
+                    return results;
+                } catch (error) {
+                    console.error('Error fetching data from backend:', error);
+                    alert('無法從後端獲取計算結果，請確認後端服務是否已啟動。');
+                    return null;
                 }
-
-                return {
-                    totalInitialInvestment,
-                    totalCost,
-                    downPaymentAmount,
-                    downPaymentRatio,
-                    ownCapitalForDownPaymentAmount,
-                    creditLoanForDownPaymentAmount,
-                    loanAmount,
-                    monthlyNetRevenue,
-                    totalAnnualExpenses,
-                    oneTimeInitialIncome,
-                    annualRenewalFee,
-                    cashFlows,
-                    investmentPeriod,
-                    purchaseType,
-                    corporateTaxRate,
-                    exchangeRate,
-                    annualAppreciation,
-                    propertyPrice,
-                    loanInterestRate,
-                    loanTerm,
-                    monthlyGrossRevenue,
-                    monthlyOperatingExpenses,
-                    annualDebtService: (monthlyPayment + creditLoanPayment) * 12,
-                    annualManagementFee: monthlyManagementAndRepairs * 12,
-                    annualPropertyTax: monthlyPropertyTax * 12,
-                    annualInsuranceCost,
-                    annualTaxAccountantFee,
-                    annualTax_y1,
-                    annualTax_y2
-                };
             }
 
             function updateUI(results) {
