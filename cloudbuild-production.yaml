@@ -23,7 +23,7 @@ steps:
       '--region', 'asia-northeast1',
       '--platform', 'managed',
       '--allow-unauthenticated',
-      '--set-env-vars', 'GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=production',
+      '--set-env-vars', 'GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production',
       '--memory', '1Gi',
       '--cpu', '1',
       '--max-instances', '20',
