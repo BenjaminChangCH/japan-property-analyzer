@@ -35,4 +35,25 @@ temp/
 
 # 測試相關檔案 (但保留測試腳本和報告)
 # test_*.py  # 保留測試腳本
-# *_TEST_REPORT.md  # 保留測試報告 
+# *_TEST_REPORT.md  # 保留測試報告
+
+# 備份和日誌
+backups/
+logs/
+*.log
+*.backup
+
+# 品質檢查報告
+quality_report_*.json
+
+# 安全掃描結果
+.security/
+safety-report.json
+
+# 效能分析檔案
+*.prof
+.coverage
+
+# 系統檔案
+.DS_Store
+Thumbs.db 

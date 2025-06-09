@@ -2,19 +2,43 @@ from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
 import math
 import os
+from version import get_version_info
+
+# 導入新的配置模組
+from config.security_config import (
+    setup_security_headers, setup_cors_security, 
+    rate_limit, calculation_rate_limit, validate_request_data
+)
+from config.logging_config import setup_logging, setup_error_handlers
+from config.health_check import setup_health_endpoints, setup_request_tracking
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
-CORS(app) # 允許跨域請求
+
+# 設定安全性和監控
+setup_cors_security(app)  # 取代原本的 CORS(app)
+setup_security_headers(app)
+setup_logging(app)
+setup_error_handlers(app)
+setup_health_endpoints(app)
+setup_request_tracking(app)
 
 @app.route('/')
+@rate_limit(max_requests=30)  # 首頁限制較寬鬆
 def index():
     # 根據環境變數決定 GA 追蹤 ID
     ga_tracking_id = os.environ.get('GA_TRACKING_ID', '')
     environment = os.environ.get('ENVIRONMENT', 'development')
     
+    app.logger.info(f"首頁訪問 - 環境: {environment}")
+    
     return render_template('index.html', 
                          ga_tracking_id=ga_tracking_id,
                          environment=environment)
+
+@app.route('/version')
+def version():
+    """API 端點：返回應用程式版本資訊"""
+    return jsonify(get_version_info())
 
 @app.route('/static/<path:path>')
 def send_static(path):
@@ -38,8 +62,16 @@ def safe_int(s, default=0):
         return default
 
 @app.route('/calculate', methods=['POST'])
+@calculation_rate_limit  # 添加計算 API 專用頻率限制
 def calculate():
     params = request.get_json()
+    
+    # 驗證必要欄位
+    required_fields = ['monetizationModel', 'purchaseType', 'propertyPrice', 'exchangeRate']
+    validation_errors = validate_request_data(params, required_fields)
+    if validation_errors:
+        app.logger.warning(f"計算請求驗證失敗: {validation_errors}")
+        return jsonify({'error': '請求資料不完整', 'details': validation_errors}), 400
     
     MAN_EN = 10000
 
@@ -277,7 +309,29 @@ def calculate():
         "annualTax_y2": annual_tax_y2
     }
 
+    app.logger.info(f"計算完成 - 物件價格: {property_price/exchange_rate:.0f} TWD, 投資期間: {investment_period} 年")
+    
     return jsonify(results)
 
+def compute_irr(cash_flows, initial_investment_period=10, tolerance=1e-6, max_iterations=100):
+    """計算 IRR (內部報酬率)"""
+    def npv(rate):
+        return sum(cf / (1 + rate) ** i for i, cf in enumerate(cash_flows))
+    
+    # 使用二分法求解
+    low, high = -0.99, 10.0
+    for _ in range(max_iterations):
+        mid = (low + high) / 2
+        npv_mid = npv(mid)
+        if abs(npv_mid) < tolerance:
+            return mid
+        elif npv_mid > 0:
+            low = mid
+        else:
+            high = mid
+    return None
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
+    # 在開發環境啟用除錯模式
+    debug_mode = os.environ.get('ENVIRONMENT', 'development') == 'development'
+    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
