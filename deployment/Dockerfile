@@ -26,9 +26,15 @@ COPY config/ ./config/
 COPY templates/ ./templates/
 COPY scripts/ ./scripts/
 
-# 在容器中設定版本資訊
+# 在容器中設定版本資訊（簡化版本）
 RUN echo "Building version: $VERSION.$BUILD_NUMBER" && \
-    python3 -c "import os; version_file = 'version.py'; content = open(version_file, 'r').read(); content = content.replace('BUILD_NUMBER = None', f'BUILD_NUMBER = \\\'{os.environ.get(\\\"BUILD_NUMBER\\\", \\\"unknown\\\")}\\\''); open(version_file, 'w').write(content); print(f'Version info updated: {os.environ.get(\\\"APP_VERSION\\\", \\\"unknown\\\")}.{os.environ.get(\\\"BUILD_NUMBER\\\", \\\"unknown\\\")}')"
+    python3 -c "import os; \
+version_file = 'version.py'; \
+content = open(version_file, 'r').read(); \
+build_num = os.environ.get('BUILD_NUMBER', 'unknown'); \
+content = content.replace('BUILD_NUMBER = None', f'BUILD_NUMBER = \"{build_num}\"'); \
+open(version_file, 'w').write(content); \
+print(f'Version info updated: {os.environ.get(\"APP_VERSION\", \"unknown\")}.{build_num}')"
 
 # Expose the port that the application will listen on
 ENV PORT 8080
