@@ -10,7 +10,7 @@ Japan Property Analyzer 版本資訊
 # MINOR: 新增功能，向後相容
 # PATCH: 錯誤修復，向後相容
 
-__version__ = "1.1.1"
+__version__ = "1.1.2"
 __version_info__ = tuple(map(int, __version__.split('.')))
 
 # 應用程式資訊
