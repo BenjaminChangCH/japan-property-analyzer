@@ -195,6 +195,70 @@ python scripts/release_manager.py full-release 1.1.0
 
 ---
 
+## ⚠️ **嚴格遵循流程 - 防範違規**
+
+### 🚨 **絕對禁止的操作**
+
+**❌ 禁止直接在 main 分支操作：**
+```bash
+git checkout main
+git commit -m "..."     # 🚨 絕對禁止！
+git push origin main    # 🚨 會跳過 STG 檢查點！
+```
+
+**❌ 禁止跳過 PR 流程：**
+- 所有變更必須通過 Pull Request
+- 所有變更必須先部署到 STG
+- 所有變更必須通過 STG 測試驗證
+
+### ✅ **正確的緊急修復流程**
+
+```bash
+# 1. 創建 Hotfix 分支
+git checkout main
+git pull origin main
+git checkout -b hotfix/urgent-fix
+
+# 2. 進行修復
+# ... 修復代碼 ...
+git add .
+git commit -m "hotfix: 緊急修復描述"
+git push origin hotfix/urgent-fix
+
+# 3. 創建 PR (觸發 STG 部署)
+# 前往 GitHub 創建 PR → 自動 STG 部署
+
+# 4. STG 測試通過後合併 PR
+# PR 合併 → 自動 PRD 部署
+```
+
+### 🔒 **流程保護機制**
+
+1. **分支保護規則**: main 分支已設定保護，需要 PR 才能合併
+2. **自動化檢查**: PR 創建時自動觸發 STG 部署和測試
+3. **強制審核**: 緊急修復也必須經過 STG 驗證
+
+### 📋 **流程檢查清單**
+
+每次發版前必須確認：
+
+- [ ] **創建了 PR**: 而非直接推送到 main
+- [ ] **STG 部署成功**: PR 創建後自動觸發
+- [ ] **STG 測試通過**: 功能和回歸測試完成
+- [ ] **PR 獲得批准**: 代碼審核完成
+- [ ] **合併 PR**: 觸發自動 PRD 部署
+
+### 🚨 **違規處理程序**
+
+如果發現跳過流程的部署：
+
+1. **立即評估影響**: 檢查 PRD 環境狀態
+2. **補充 STG 測試**: 手動部署到 STG 並測試
+3. **文檔記錄**: 記錄違規原因和影響
+4. **流程改善**: 強化保護機制
+
+---
+
 ## 🆘 **支援聯絡**
 
 如有部署問題，請聯絡：
