@@ -1,0 +1,62 @@
+steps:
+  # 設定版本號和建置編號
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      # 獲取版本號和建置編號
+      VERSION=$(python3 -c "from version import __version__; print(__version__)")
+      BUILD_NUM=${BUILD_ID:0:8}
+      echo "Building version: $${VERSION}.$$BUILD_NUM"
+      
+      # 設定環境變數供後續步驟使用
+      echo "VERSION=$${VERSION}" > /workspace/build_vars.env
+      echo "BUILD_NUM=$$BUILD_NUM" >> /workspace/build_vars.env
+      echo "IMAGE_TAG=$${VERSION}.$$BUILD_NUM" >> /workspace/build_vars.env
+
+  # 建置 Docker 映像 (使用版本標籤)
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      source /workspace/build_vars.env
+      docker build \
+        --build-arg VERSION=$$VERSION \
+        --build-arg BUILD_NUMBER=$$BUILD_NUM \
+        -t gcr.io/$PROJECT_ID/japan-property-analyzer-prod:latest \
+        -t gcr.io/$PROJECT_ID/japan-property-analyzer-prod:$$IMAGE_TAG \
+        .
+
+  # 推送映像到 Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      source /workspace/build_vars.env
+      docker push gcr.io/$PROJECT_ID/japan-property-analyzer-prod:latest
+      docker push gcr.io/$PROJECT_ID/japan-property-analyzer-prod:$$IMAGE_TAG
+
+  # 部署到 Cloud Run (生產環境)
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+      source /workspace/build_vars.env
+      gcloud run deploy japan-property-analyzer-prod \
+        --image gcr.io/$PROJECT_ID/japan-property-analyzer-prod:$$IMAGE_TAG \
+        --region asia-northeast1 \
+        --platform managed \
+        --allow-unauthenticated \
+        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM \
+        --memory 1Gi \
+        --cpu 1 \
+        --max-instances 20 \
+        --timeout 300
+
+# 設定觸發條件：當推送到 main 分支時觸發
+options:
+  logging: CLOUD_LOGGING_ONLY 
