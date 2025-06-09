@@ -13,11 +13,18 @@ ENV BUILD_NUMBER=$BUILD_NUMBER
 WORKDIR /app
 
 # Copy the requirements file and install dependencies
-COPY deployment/requirements.txt .
+COPY deployment/requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
-COPY . .
+# Copy the main application files
+COPY main.py .
+COPY version.py .
+COPY env.example .
+
+# Copy directories
+COPY config/ ./config/
+COPY templates/ ./templates/
+COPY scripts/ ./scripts/
 
 # 在容器中設定版本資訊
 RUN echo "Building version: $VERSION.$BUILD_NUMBER" && \
