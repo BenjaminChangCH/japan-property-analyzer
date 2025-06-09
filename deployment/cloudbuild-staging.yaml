@@ -6,7 +6,7 @@ steps:
     - '-c'
     - |
       # 獲取版本號和建置編號
-      VERSION=$(python3 -c "from version import __version__; print(__version__)")
+      VERSION=${_VERSION:-$(python3 -c "from version import __version__; print(__version__)")}
       BUILD_NUM=${BUILD_ID:0:8}
       echo "Building STG version: $${VERSION}.$$BUILD_NUM"
       
