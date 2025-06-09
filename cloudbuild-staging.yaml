@@ -20,7 +20,7 @@ steps:
     args: [
       'run', 'deploy', 'japan-property-analyzer',
       '--image', 'gcr.io/$PROJECT_ID/japan-property-analyzer:latest',
-      '--region', 'asia-northeast1',
+      '--region', 'asia-east1',
       '--platform', 'managed',
       '--allow-unauthenticated',
       '--set-env-vars', 'GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=staging',
