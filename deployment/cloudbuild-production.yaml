@@ -27,6 +27,7 @@ steps:
         --build-arg BUILD_NUMBER=$$BUILD_NUM \
         -t gcr.io/$PROJECT_ID/japan-property-analyzer-prod:latest \
         -t gcr.io/$PROJECT_ID/japan-property-analyzer-prod:$$IMAGE_TAG \
+        -f Dockerfile \
         .
 
   # 推送映像到 Container Registry
