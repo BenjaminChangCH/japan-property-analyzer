@@ -12,7 +12,7 @@ from config.security_config import (
 from config.logging_config import setup_logging, setup_error_handlers
 from config.health_check import setup_health_endpoints, setup_request_tracking
 
-app = Flask(__name__, static_folder='static', template_folder='templates')
+app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # 設定安全性和監控
 setup_cors_security(app)  # 取代原本的 CORS(app)
@@ -22,18 +22,30 @@ setup_error_handlers(app)
 setup_health_endpoints(app)
 setup_request_tracking(app)
 
+# --- 版本號 ---
+def get_version():
+    try:
+        with open('version.py', 'r') as f:
+            exec(f.read(), globals())
+        return __version__
+    except (FileNotFoundError, NameError):
+        return "N/A"
+
+VERSION = get_version()
+
+# --- GA Tracking ---
+GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'G-59XMZ0SZ0G') # Default to test ID
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
+
 @app.route('/')
 @rate_limit(max_requests=30)  # 首頁限制較寬鬆
 def index():
-    # 根據環境變數決定 GA 追蹤 ID
-    ga_tracking_id = os.environ.get('GA_TRACKING_ID', '')
-    environment = os.environ.get('ENVIRONMENT', 'development')
-    
-    app.logger.info(f"首頁訪問 - 環境: {environment}")
+    app.logger.info(f"首頁訪問 - 環境: {ENVIRONMENT}")
     
     return render_template('index.html', 
-                         ga_tracking_id=ga_tracking_id,
-                         environment=environment)
+                         version=VERSION,
+                         ga_tracking_id=GA_TRACKING_ID,
+                         environment=ENVIRONMENT)
 
 @app.route('/version')
 def version():
@@ -333,5 +345,5 @@ def compute_irr(cash_flows, initial_investment_period=10, tolerance=1e-6, max_it
 
 if __name__ == '__main__':
     # 在開發環境啟用除錯模式
-    debug_mode = os.environ.get('ENVIRONMENT', 'development') == 'development'
+    debug_mode = ENVIRONMENT == 'development'
     app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 

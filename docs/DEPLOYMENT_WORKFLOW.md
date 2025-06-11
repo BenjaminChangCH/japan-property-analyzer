@@ -264,4 +264,4 @@ python scripts/release_manager.py full-release 1.1.0
 - **緊急聯絡**: [24/7 支援聯絡方式]
 - **文件問題**: [文件維護團隊]
 
-前往: https://github.com/BenjaminChangCH/japan-property-analyzer/pull/new/hotfix/dockerfile-syntax-fix 
+前往: https://github.com/BenjaminChangCH/japan-property-analyzer/pull/new/hotfix/dockerfile-syntax-fix
