@@ -163,9 +163,9 @@ graph TD
 
 ```bash
 # 1. 正常的 Git Flow 開發
-python scripts/git_flow_helper.py create "add-payment-feature"
+git checkout -b feature/add-payment-feature
 # ... 進行開發 ...
-python scripts/git_flow_helper.py commit "feat: 新增付款功能"
+git add . && git commit -m "feat: 新增付款功能" && git push origin feature/add-payment-feature
 # ... 創建並合併 PR ...
 
 # 2. 合併到 main 後，發佈版本

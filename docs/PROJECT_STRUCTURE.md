@@ -2,6 +2,28 @@
 
 ## 📁 整理後的檔案結構
 
+## 🛠️ 開發工具使用
+
+### 版本管理
+```bash
+python scripts/version_manager.py
+```
+
+### 環境檢查
+```bash
+bash scripts/check_environments.sh
+```
+
+### 程式碼品質檢查
+```bash
+python scripts/quality_checker.py
+```
+
+### 備份管理
+```bash
+python scripts/backup_manager.py
+```
+
 ```
 Project Japan/
 ├── 📄 main.py                    # 主要應用程式 (含版本 API)
@@ -33,8 +55,11 @@ Project Japan/
 │   └── 📄 PROJECT_STRUCTURE.md  # 專案結構說明 (本檔案)
 ├── 
 ├── 📁 scripts/                  # 腳本工具
-│   ├── 📄 git_flow_helper.py    # Git Flow 助手
-│   └── 📄 version_manager.py    # 版本號管理工具
+│   ├── 📄 sync_dev_environment.sh  # 開發環境同步腳本
+│   ├── 📄 version_manager.py       # 版本管理工具
+│   ├── 📄 backup_manager.py        # 備份管理工具
+│   ├── 📄 check_environments.sh    # 環境檢查腳本
+│   └── 📄 quality_checker.py       # 程式碼品質檢查工具
 ├── 
 ├── 📁 templates/                # 網頁模板
 │   └── 📄 index.html           # 主頁面模板
@@ -80,8 +105,11 @@ Project Japan/
 * **專案文檔**: 變更日誌、結構說明
 
 ### 📁 scripts/ - 開發工具
-* **git_flow_helper.py**: Git Flow 自動化工具
+* **sync_dev_environment.sh**: 開發環境同步腳本
 * **version_manager.py**: 版本號管理和發佈工具
+* **backup_manager.py**: 備份管理工具
+* **check_environments.sh**: 環境檢查腳本
+* **quality_checker.py**: 程式碼品質檢查工具
 
 ### 📁 tests/ - 測試套件
 * **stg/**: STG 環境專用測試
@@ -107,20 +135,7 @@ python tests/prd/test_prd_ga.py
 python tests/shared/verify_prd_deployment.py
 ```
 
-### Git Flow 工具
-```bash
-# 查看 Git Flow 指引
-python scripts/git_flow_helper.py
 
-# 創建 feature branch
-python scripts/git_flow_helper.py create "新功能名稱"
-
-# 提交並推送變更
-python scripts/git_flow_helper.py commit "提交訊息"
-
-# 檢查 Git 狀態
-python scripts/git_flow_helper.py status
-```
 
 ### 版本號管理
 ```bash
@@ -157,9 +172,8 @@ python -c "from config.config import *; print('STG:', STG_CONFIG); print('PRD:',
 
 ## 🛡️ Git Flow 整合
 
-整理後的結構完全支援新的 Git Flow：
-* **scripts/git_flow_helper.py** 自動化分支管理
-* **分支保護** 確保代碼品質
+整理後的結構完全支援標準 Git Flow：
+* **標準化分支管理** 確保代碼品質
 * **CI/CD** 自動部署流程
 
 ## 🔢 版本號控制整合
@@ -177,7 +191,7 @@ python -c "from config.config import *; print('STG:', STG_CONFIG); print('PRD:',
 3. **配置變更**: 統一在 config/ 目錄管理
 4. **部署設定**: 在 deployment/ 目錄更新相關檔案
 5. **版本發佈**: 使用 version_manager.py 工具標準化發佈流程
-6. **Git Flow**: 使用 git_flow_helper.py 確保正確的開發流程
+6. **Git Flow**: 遵循標準 Git Flow 開發流程
 
 ## 🚀 開發流程整合
 
@@ -186,13 +200,13 @@ python -c "from config.config import *; print('STG:', STG_CONFIG); print('PRD:',
 ```
 1. 需求分析
    ↓
-2. 創建 Feature Branch (git_flow_helper.py)
+2. 創建 Feature Branch
    ↓
 3. 開發實作
    ↓
 4. 測試驗證 (tests/)
    ↓
-5. 提交到 Feature Branch (git_flow_helper.py)
+5. 提交到 Feature Branch
    ↓
 6. 創建 Pull Request
    ↓
