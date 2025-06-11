@@ -25,6 +25,7 @@ COPY env.example .
 COPY config/ ./config/
 COPY templates/ ./templates/
 COPY scripts/ ./scripts/
+COPY static/ ./static/
 
 # 在容器中設定版本資訊（簡化版本）
 RUN echo "Building version: $VERSION.$BUILD_NUMBER" && \
