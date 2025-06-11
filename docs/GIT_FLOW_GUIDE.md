@@ -37,133 +37,105 @@ git push origin main  # ❌ 被拒絕！
 - ✅ **Require branches to be up to date**: 需要與 main 同步
 - ✅ **Restrict pushes**: 限制直接推送到 main
 
-## 📋 新的標準 Git Flow
+## 📝 標準 Git Flow 流程
 
-### 🎯 完整開發流程
+### 🚀 快速開始
 
-```mermaid
-graph TD
-    A[開始開發] --> B[創建 Feature Branch]
-    B --> C[進行開發]
-    C --> D[提交變更]
-    D --> E[推送到 Feature Branch]
-    E --> F[創建 Pull Request]
-    F --> G[代碼審查]
-    G --> H{審查通過?}
-    H -->|是| I[合併到 Main]
-    H -->|否| C
-    I --> J[自動觸發 CI/CD]
-    J --> K[部署到生產環境]
-    K --> L[完成]
-```
-
-### 🔧 使用 Git Flow 助手工具
-
-我們已經創建了 `scripts/git_flow_helper.py` 來簡化這個流程：
-
-#### 1. 查看流程指引
+#### 1. 創建功能分支
 ```bash
-python scripts/git_flow_helper.py
+git checkout main
+git pull origin main
+git checkout -b feature/your-feature-name
 ```
 
-#### 2. 創建新的 Feature Branch
+#### 2. 開發並提交
 ```bash
-python scripts/git_flow_helper.py create "新功能名稱"
+git add .
+git commit -m "feat: 新增功能描述"
+git push origin feature/your-feature-name
 ```
-例如：
+
+#### 3. 檢查狀態
 ```bash
-python scripts/git_flow_helper.py create "add-payment-feature"
-python scripts/git_flow_helper.py create "fix-calculation-bug"
-python scripts/git_flow_helper.py create "update-ga-tracking"
+git status
+git log --oneline -5
 ```
 
-#### 3. 開發完成後提交
+### 💡 分支命名規範
+
+推薦的分支命名格式：
 ```bash
-python scripts/git_flow_helper.py commit "feat: 新增付款功能"
+feature/add-payment-feature
+feature/fix-calculation-bug  
+feature/update-ga-tracking
 ```
 
-#### 4. 工具會自動：
-- ✅ 檢查當前分支（避免在 main 分支操作）
-- ✅ 添加所有變更的檔案
-- ✅ 提交變更
-- ✅ 推送到遠端分支
-- ✅ 顯示 Pull Request 創建連結
+### 🔄 完整開發流程
 
-#### 5. 檢查 Git 狀態
+1. **創建功能分支**
 ```bash
-python scripts/git_flow_helper.py status
+git checkout -b feature/add-tax-calculation
 ```
 
-## 🚀 實際操作範例
-
-### 情境：新增一個計算功能
-
+2. **開發和測試**
 ```bash
-# 1. 創建 feature branch
-python scripts/git_flow_helper.py create "add-tax-calculation"
-# 🌿 創建新分支: feature/add-tax-calculation
-# 📥 拉取最新變更...
-# ✅ 成功創建並切換到分支: feature/add-tax-calculation
-
-# 2. 進行開發（編輯檔案）
-# ... 修改 main.py, 新增測試檔案等 ...
-
-# 3. 提交變更
-python scripts/git_flow_helper.py commit "feat: 新增稅務計算功能"
-# 📁 檔案變更:
-# M  main.py
-# A  tests/test_tax_calculation.py
-# 📤 添加變更...
-# 💾 提交變更...
-# 🚀 推送到遠端...
-# ✅ 成功推送到 feature/add-tax-calculation
-# 
-# 🔗 創建 Pull Request:
-#    https://github.com/your-repo/pull/new/feature/add-tax-calculation
-
-# 4. 點擊連結創建 PR
-# 5. 在 GitHub 上審查並合併
-# 6. 合併後會自動觸發部署
+# 開發程式碼...
+# 執行測試...
 ```
 
-## ⚡ 快速命令參考
+3. **提交變更**
+```bash
+git add .
+git commit -m "feat: 新增稅務計算功能"
+```
+
+4. **推送到遠端**
+```bash
+git push origin feature/add-tax-calculation
+```
+
+5. **創建 Pull Request**
+- 在 GitHub 上創建 PR
+- 等待代碼審查
+- 合併到 main 分支
+
+### 📋 最佳實踐
+
+1. **分支管理**
+   - 從最新的 main 分支創建功能分支
+   - 使用描述性的分支名稱
+   - 保持分支小而專注
+
+2. **提交規範**
+   - 使用有意義的提交訊息
+   - 遵循 Conventional Commits 格式
+   - 每個提交應該是一個邏輯單元
+
+3. **代碼審查**
+   - 創建詳細的 PR 描述
+   - 回應審查意見
+   - 保持代碼品質
+
+### 🛠️ 常用命令參考
 
 ```bash
-# 基本流程
-python scripts/git_flow_helper.py create "功能名稱"
-# ... 進行開發 ...
-python scripts/git_flow_helper.py commit "提交訊息"
+# 檢查當前狀態
+git status
 
-# 檢查狀態
-python scripts/git_flow_helper.py status
+# 查看分支
+git branch -a
 
-# 查看幫助
-python scripts/git_flow_helper.py
-```
+# 切換分支
+git checkout branch-name
 
-## 🔄 Pull Request 流程
+# 更新本地 main 分支
+git checkout main && git pull origin main
 
-### 在 GitHub 上操作
+# 查看提交歷史
+git log --oneline --graph --decorate
 
-1. **創建 PR**: 點擊工具提供的連結
-2. **填寫描述**: 
-   - 標題：簡潔描述變更
-   - 內容：詳細說明變更內容
-   - 標籤：選擇適當的標籤
-3. **審查變更**: 檢查 Files changed 分頁
-4. **合併 PR**: 點擊 "Merge pull request"
-5. **刪除分支**: 合併後可選擇刪除 feature branch
-
-### PR 標題建議格式
-
-```
-feat: 新增功能描述
-fix: 修復問題描述  
-docs: 更新文檔
-test: 新增測試
-refactor: 重構代碼
-style: 格式調整
-chore: 雜項更新
+# 撤銷上次提交（保留檔案變更）
+git reset --soft HEAD~1
 ```
 
 ## 🛠️ 故障排除

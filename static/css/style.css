@@ -149,7 +149,8 @@ th {
 #annual-projections table td:nth-child(2),
 #annual-projections table td:nth-child(3),
 #annual-projections table td:nth-child(4),
-#annual-projections table td:nth-child(5) {
+#annual-projections table td:nth-child(5),
+#annual-projections table td:nth-child(6) {
     text-align: right;
     font-family: monospace, 'Noto Sans TC';
 }
@@ -245,6 +246,18 @@ th {
 }
 .value-cell {
     font-weight: 700;
+}
+
+.analysis-note {
+    background-color: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-left: 4px solid #f39c12;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: #856404;
 }
 
 #loading-overlay {
