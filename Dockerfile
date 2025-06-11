@@ -13,7 +13,7 @@ ENV BUILD_NUMBER=$BUILD_NUMBER
 WORKDIR /app
 
 # Copy the requirements file and install dependencies
-COPY deployment/requirements.txt ./requirements.txt
+COPY requirements.txt ./requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the main application files
