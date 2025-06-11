@@ -1,4 +1,95 @@
 document.addEventListener('DOMContentLoaded', function () {
+    const expertValues = {
+        propertyTypes: {
+            '1LDK': {
+                priceModifier: 1,
+                rentModifier: 1,
+                adrModifier: 1,
+                structure: 'rc',
+                buildingRatio: 65,
+                maxOccupancy: 4,
+                managementFeeRatio: 12.5,
+                utilitiesAirbnb: 2.5,
+                utilitiesLease: 0.5,
+                managementFeeTooltip: '1LDK公寓的管理費與修繕金佔比較高，通常在10-15%。',
+                structureTooltip: '1LDK通常為RC/SRC構造，法定耐用年限47年。',
+                buildingRatioTooltip: '中小型公寓的建物價值佔比約60-70%。'
+            },
+            '2LDK': {
+                priceModifier: 1.8,
+                rentModifier: 1.6,
+                adrModifier: 1.5,
+                structure: 'rc',
+                buildingRatio: 60,
+                maxOccupancy: 6,
+                managementFeeRatio: 10,
+                utilitiesAirbnb: 3.5,
+                utilitiesLease: 0.6,
+                managementFeeTooltip: '2LDK公寓的管理費與修繕金佔比約8-12%。',
+                structureTooltip: '2LDK通常為RC/SRC構造，法定耐用年限47年。',
+                buildingRatioTooltip: '大型公寓的建物價值佔比約55-65%。'
+            },
+            'tower': {
+                priceModifier: 2.5,
+                rentModifier: 2.2,
+                adrModifier: 2,
+                structure: 'rc',
+                buildingRatio: 70,
+                maxOccupancy: 5,
+                managementFeeRatio: 15,
+                utilitiesAirbnb: 4,
+                utilitiesLease: 0.8,
+                managementFeeTooltip: '塔樓因公共設施豐富(如健身房、接待櫃台)，管理費與修繕金最高，通常佔15-20%。',
+                structureTooltip: '塔樓均為RC/SRC構造，法定耐用年限47年。',
+                buildingRatioTooltip: '塔樓的建物價值佔比最高，因為其建築成本和附加價值高，通常在70-80%。'
+            },
+            'house': {
+                priceModifier: 2.2,
+                rentModifier: 2,
+                adrModifier: 2.5,
+                structure: 'wood',
+                buildingRatio: 40,
+                maxOccupancy: 10,
+                managementFeeRatio: 5,
+                utilitiesAirbnb: 5,
+                utilitiesLease: 0.2,
+                managementFeeTooltip: '一戶建沒有管理費，但需自行提撥修繕金，建議每年提撥房價的0.5% (約5%的租金)做為長期維護基金。',
+                structureTooltip: '一戶建多為木造，法定耐用年限22年，折舊速度快，有利於早期節稅。',
+                buildingRatioTooltip: '一戶建的土地價值佔比較高，建物價值佔比通常在30-50%，這有助於降低固定資產稅。'
+            }
+        },
+        locations: {
+            'Minato':    { basePrice: 8000, baseRent: 30, baseADR: 25000 },
+            'Chiyoda':   { basePrice: 9000, baseRent: 32, baseADR: 28000 },
+            'Chuo':      { basePrice: 8500, baseRent: 31, baseADR: 27000 },
+            'Shibuya':   { basePrice: 8200, baseRent: 29, baseADR: 26000 },
+            'Shinjuku':  { basePrice: 7500, baseRent: 28, baseADR: 24000 },
+            'Meguro':    { basePrice: 7000, baseRent: 26, baseADR: 22000 },
+            'Setagaya':  { basePrice: 6500, baseRent: 24, baseADR: 20000 },
+            'Shinagawa': { basePrice: 6800, baseRent: 25, baseADR: 21000 },
+            'Bunkyo':    { basePrice: 7200, baseRent: 27, baseADR: 23000 },
+            'Taito':     { basePrice: 5800, baseRent: 22, baseADR: 19000 },
+            'Toshima':   { basePrice: 6000, baseRent: 23, baseADR: 19500 },
+            'Koto':      { basePrice: 5500, baseRent: 20, baseADR: 18000 },
+            'Ota':       { basePrice: 5300, baseRent: 19, baseADR: 17000 },
+            'Suginami':  { basePrice: 5600, baseRent: 21, baseADR: 18500 },
+            'Nakano':    { basePrice: 5700, baseRent: 21.5, baseADR: 18800},
+            'Arakawa':   { basePrice: 4800, baseRent: 18, baseADR: 16000 },
+            'Sumida':    { basePrice: 5000, baseRent: 18.5, baseADR: 16500},
+            'Itabashi':  { basePrice: 4500, baseRent: 17, baseADR: 15000 },
+            'Nerima':    { basePrice: 4600, baseRent: 17.5, baseADR: 15500},
+            'Kita':      { basePrice: 4700, baseRent: 17.8, baseADR: 15800},
+            'Adachi':    { basePrice: 4000, baseRent: 15, baseADR: 14000 },
+            'Katsushika':{ basePrice: 3800, baseRent: 14, baseADR: 13500 },
+            'Edogawa':   { basePrice: 4200, baseRent: 16, baseADR: 14500 }
+        },
+        monetizationModels: {
+            'airbnb': {},
+            'personalLease': {},
+            'commercialLease': {}
+        }
+    };
+
     const propertyForm = document.getElementById('property-form');
     const calculateBtn = document.getElementById('calculateBtn');
     const resultsContainer = document.getElementById('resultsContainer');
@@ -90,7 +181,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         showLoading(true, "正在與後端伺服器進行財務計算...");
         try {
-            const response = await fetch('/analyze', {
+            const response = await fetch('/calculate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData)
@@ -133,18 +224,21 @@ document.addEventListener('DOMContentLoaded', function () {
         buttons.forEach(btn => btn.style.display = 'none');
         
         html2canvas(reportElement, {
-            scale: 2, // Improve quality
+            scale: 1.5, // 降低畫質以減少檔案大小 (從2降到1.5)
             useCORS: true,
-            logging: true,
+            logging: false, // 關閉log以提升效能
             windowWidth: document.documentElement.offsetWidth,
             windowHeight: document.documentElement.offsetHeight,
+            backgroundColor: '#ffffff', // 設定背景色
+            removeContainer: true,
             onclone: (doc) => {
                  // Ensure styles are applied in the cloned document
                 const clonedButtons = doc.querySelectorAll('.btn-group, .expert-marker, .info-icon');
                 clonedButtons.forEach(btn => btn.style.display = 'none');
             }
         }).then(canvas => {
-            const imgData = canvas.toDataURL('image/png');
+            // 使用JPEG格式並降低品質以減少檔案大小
+            const imgData = canvas.toDataURL('image/jpeg', 0.8);
             const pdf = new jsPDF({
                 orientation: 'p',
                 unit: 'pt',
@@ -163,13 +257,13 @@ document.addEventListener('DOMContentLoaded', function () {
             let heightLeft = imgHeight;
             let position = 0;
 
-            pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+            pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
             heightLeft -= pdfHeight;
 
             while (heightLeft > 0) {
                 position = heightLeft - imgHeight;
                 pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, pdfWidth, imgHeight);
+                pdf.addImage(imgData, 'JPEG', 0, position, pdfWidth, imgHeight);
                 heightLeft -= pdfHeight;
             }
             
@@ -209,6 +303,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function getFormData() {
         const formData = {};
         allInputs.forEach(input => {
+            // 跳過隱藏的字段以避免重複
+            if (input.closest('.hidden')) {
+                return;
+            }
+            
             if (input.type === 'number' || input.inputmode === 'decimal') {
                 formData[input.id] = parseFloat(input.value) || 0;
             } else if (input.type === 'checkbox') {
@@ -218,6 +317,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 formData[input.id] = input.value;
             }
         });
+        
+        // 調試：顯示收集到的數據
+        console.log('收集到的表單數據:', formData);
         return formData;
     }
     
@@ -267,8 +369,14 @@ document.addEventListener('DOMContentLoaded', function () {
      */
     function displayResults(results) {
         // --- 1. Key Performance Indicators (KPIs) ---
-        document.getElementById('cashOnCashReturn').textContent = `${formatCurrency(results.kpi.cash_on_cash_return, 2)}%`;
-        document.getElementById('totalROI').textContent = `${formatCurrency(results.kpi.irr, 2)}%`;
+        const cashOnCashEl = document.getElementById('cashOnCashReturn');
+        cashOnCashEl.textContent = `${formatCurrency(results.kpi.cash_on_cash_return, 2)}%`;
+        cashOnCashEl.className = `value-cell ${results.kpi.cash_on_cash_return > 0 ? 'positive' : 'negative'}`;
+        
+        const totalROIEl = document.getElementById('totalROI');
+        totalROIEl.textContent = `${formatCurrency(results.kpi.irr, 2)}%`;
+        totalROIEl.className = `value-cell ${results.kpi.irr > 0 ? 'positive' : 'negative'}`;
+        
         document.getElementById('paybackPeriod').textContent = `${results.kpi.payback_period > 0 ? formatCurrency(results.kpi.payback_period, 1) + ' 年' : '無法回收'}`;
 
         // --- 2. Initial Investment ---
@@ -294,7 +402,7 @@ document.addEventListener('DOMContentLoaded', function () {
         
         const cf = results.cash_flow;
         cashFlowBody.appendChild(createRow('總租金收入', cf.total_revenue_y1, cf.total_revenue_y2, '根據您的營運模式、入住率、租金等參數計算出的年度總收入。'));
-        cashFlowBody.appendChild(createRow('營運總支出', cf.total_expenses_y1, cf.total_expenses_y2, '包含物業管理、水電、平台費、清潔、稅務等所有營運相關的年度開銷。'));
+        cashFlowBody.appendChild(createRow('營運總支出', -cf.total_expenses_y1, -cf.total_expenses_y2, '包含物業管理、水電、平台費、清潔、稅務等所有營運相關的年度開銷。'));
         
         const ebitdaRow = createRow('稅息折舊及攤銷前利潤 (EBITDA)', cf.ebitda_y1, cf.ebitda_y2, 'EBITDA = 總收入 - 營運總支出。此數據反映了房產本身的核心獲利能力，排除了融資和稅務結構的影響。');
         ebitdaRow.classList.add('highlight-row');
@@ -313,9 +421,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Net Cash Flow Totals
         document.getElementById('netCashFlow_y1').textContent = formatCurrency(cf.net_cash_flow_y1);
-        document.getElementById('netCashFlow_y1').className = `value-cell ${cf.net_cash_flow_y1 > 0 ? 'positive' : 'negative'}`;
+        document.getElementById('netCashFlow_y1').className = `value-cell ${cf.net_cash_flow_y1 > 0 ? 'positive' : cf.net_cash_flow_y1 < 0 ? 'negative' : ''}`;
         document.getElementById('netCashFlow_y2').textContent = formatCurrency(cf.net_cash_flow_y2);
-        document.getElementById('netCashFlow_y2').className = `value-cell ${cf.net_cash_flow_y2 > 0 ? 'positive' : 'negative'}`;
+        document.getElementById('netCashFlow_y2').className = `value-cell ${cf.net_cash_flow_y2 > 0 ? 'positive' : cf.net_cash_flow_y2 < 0 ? 'negative' : ''}`;
 
 
         // --- 4. Annual Projections Table ---
@@ -325,10 +433,10 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>${item.year}</td>
-                <td class="value-cell ${item.net_cash_flow > 0 ? 'positive' : 'negative'}">${formatCurrency(item.net_cash_flow)}</td>
+                <td class="value-cell ${item.net_cash_flow > 0 ? 'positive' : item.net_cash_flow < 0 ? 'negative' : ''}">${formatCurrency(item.net_cash_flow)}</td>
                 <td class="value-cell">${formatCurrency(item.property_value)}</td>
                 <td class="value-cell">${formatCurrency(item.loan_balance)}</td>
-                <td class="value-cell ${item.net_equity > 0 ? 'positive' : 'negative'}">${formatCurrency(item.net_equity)}</td>
+                <td class="value-cell ${item.net_equity > 0 ? 'positive' : item.net_equity < 0 ? 'negative' : ''}">${formatCurrency(item.net_equity)}</td>
             `;
             annualTableBody.appendChild(row);
         });
@@ -347,11 +455,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // ===================================================================================
     //                                  EXPERT VALUES LOGIC
     // ===================================================================================
-    
-    // --- Expert-defined default values and parameters ---
-    const expertValues = {
-        // ... (rest of the expertValues object)
-    };
     
     /**
      * Main function to update form fields with expert-recommended values.
@@ -416,95 +519,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     initialize();
-});
-
-const expertValues = {
-    propertyTypes: {
-        '1LDK': {
-            priceModifier: 1,
-            rentModifier: 1,
-            adrModifier: 1,
-            structure: 'rc',
-            buildingRatio: 65,
-            maxOccupancy: 4,
-            managementFeeRatio: 12.5,
-            utilitiesAirbnb: 2.5,
-            utilitiesLease: 0.5,
-            managementFeeTooltip: '1LDK公寓的管理費與修繕金佔比較高，通常在10-15%。',
-            structureTooltip: '1LDK通常為RC/SRC構造，法定耐用年限47年。',
-            buildingRatioTooltip: '中小型公寓的建物價值佔比約60-70%。'
-        },
-        '2LDK': {
-            priceModifier: 1.8,
-            rentModifier: 1.6,
-            adrModifier: 1.5,
-            structure: 'rc',
-            buildingRatio: 60,
-            maxOccupancy: 6,
-            managementFeeRatio: 10,
-            utilitiesAirbnb: 3.5,
-            utilitiesLease: 0.6,
-            managementFeeTooltip: '2LDK公寓的管理費與修繕金佔比約8-12%。',
-            structureTooltip: '2LDK通常為RC/SRC構造，法定耐用年限47年。',
-            buildingRatioTooltip: '大型公寓的建物價值佔比約55-65%。'
-        },
-        'tower': {
-            priceModifier: 2.5,
-            rentModifier: 2.2,
-            adrModifier: 2,
-            structure: 'rc',
-            buildingRatio: 70,
-            maxOccupancy: 5,
-            managementFeeRatio: 15,
-            utilitiesAirbnb: 4,
-            utilitiesLease: 0.8,
-            managementFeeTooltip: '塔樓因公共設施豐富(如健身房、接待櫃台)，管理費與修繕金最高，通常佔15-20%。',
-            structureTooltip: '塔樓均為RC/SRC構造，法定耐用年限47年。',
-            buildingRatioTooltip: '塔樓的建物價值佔比最高，因為其建築成本和附加價值高，通常在70-80%。'
-        },
-        'house': {
-            priceModifier: 2.2,
-            rentModifier: 2,
-            adrModifier: 2.5,
-            structure: 'wood',
-            buildingRatio: 40,
-            maxOccupancy: 10,
-            managementFeeRatio: 5,
-            utilitiesAirbnb: 5,
-            utilitiesLease: 0.2,
-            managementFeeTooltip: '一戶建沒有管理費，但需自行提撥修繕金，建議每年提撥房價的0.5% (約5%的租金)做為長期維護基金。',
-            structureTooltip: '一戶建多為木造，法定耐用年限22年，折舊速度快，有利於早期節稅。',
-            buildingRatioTooltip: '一戶建的土地價值佔比較高，建物價值佔比通常在30-50%，這有助於降低固定資產稅。'
-        }
-    },
-    locations: {
-        'Minato':    { basePrice: 8000, baseRent: 30, baseADR: 25000 },
-        'Chiyoda':   { basePrice: 9000, baseRent: 32, baseADR: 28000 },
-        'Chuo':      { basePrice: 8500, baseRent: 31, baseADR: 27000 },
-        'Shibuya':   { basePrice: 8200, baseRent: 29, baseADR: 26000 },
-        'Shinjuku':  { basePrice: 7500, baseRent: 28, baseADR: 24000 },
-        'Meguro':    { basePrice: 7000, baseRent: 26, baseADR: 22000 },
-        'Setagaya':  { basePrice: 6500, baseRent: 24, baseADR: 20000 },
-        'Shinagawa': { basePrice: 6800, baseRent: 25, baseADR: 21000 },
-        'Bunkyo':    { basePrice: 7200, baseRent: 27, baseADR: 23000 },
-        'Taito':     { basePrice: 5800, baseRent: 22, baseADR: 19000 },
-        'Toshima':   { basePrice: 6000, baseRent: 23, baseADR: 19500 },
-        'Koto':      { basePrice: 5500, baseRent: 20, baseADR: 18000 },
-        'Ota':       { basePrice: 5300, baseRent: 19, baseADR: 17000 },
-        'Suginami':  { basePrice: 5600, baseRent: 21, baseADR: 18500 },
-        'Nakano':    { basePrice: 5700, baseRent: 21.5, baseADR: 18800},
-        'Arakawa':   { basePrice: 4800, baseRent: 18, baseADR: 16000 },
-        'Sumida':    { basePrice: 5000, baseRent: 18.5, baseADR: 16500},
-        'Itabashi':  { basePrice: 4500, baseRent: 17, baseADR: 15000 },
-        'Nerima':    { basePrice: 4600, baseRent: 17.5, baseADR: 15500},
-        'Kita':      { basePrice: 4700, baseRent: 17.8, baseADR: 15800},
-        'Adachi':    { basePrice: 4000, baseRent: 15, baseADR: 14000 },
-        'Katsushika':{ basePrice: 3800, baseRent: 14, baseADR: 13500 },
-        'Edogawa':   { basePrice: 4200, baseRent: 16, baseADR: 14500 }
-    },
-    monetizationModels: {
-        'airbnb': {},
-        'personalLease': {},
-        'commercialLease': {}
-    }
-}; 
+}); 
