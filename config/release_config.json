@@ -1,8 +1,0 @@
-{
-  "stg_approval_required": true,
-  "prd_approval_required": true,
-  "auto_rollback_enabled": true,
-  "health_check_timeout": 300,
-  "stg_base_url": "https://japan-property-analyzer-stg.example.com",
-  "prd_base_url": "https://japan-property-analyzer-prod.example.com"
-}
