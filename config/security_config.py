@@ -41,7 +41,7 @@ def setup_security_headers(app):
         # CSP 設定
         csp = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com; "
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; "
             "img-src 'self' data: https://www.google-analytics.com; "
             "connect-src 'self' https://www.google-analytics.com; "
         )
@@ -140,6 +140,15 @@ def validate_request_data(data, required_fields):
     missing_fields = []
     invalid_fields = []
     
+    def safe_float_check(val):
+        """安全轉換為float並檢查"""
+        if val is None or val == '':
+            return None
+        try:
+            return float(val)
+        except (ValueError, TypeError):
+            return None
+    
     for field in required_fields:
         if field not in data:
             missing_fields.append(field)
@@ -147,13 +156,25 @@ def validate_request_data(data, required_fields):
             
         value = data[field]
         
+        # 對於字符串類型的選擇字段，直接檢查不為空
+        if field in ['monetizationModel', 'purchaseType', 'loanOrigin', 'buildingStructure']:
+            if not value or value.strip() == '':
+                invalid_fields.append(f"{field} 不能為空")
+            continue
+        
         # 檢查數值範圍
         if field.endswith('Ratio') or field.endswith('Rate'):
-            if not isinstance(value, (int, float)) or value < 0 or value > 100:
+            num_value = safe_float_check(value)
+            if num_value is None:
+                invalid_fields.append(f"{field} 必須是有效數值")
+            elif num_value < 0 or num_value > 100:
                 invalid_fields.append(f"{field} 必須在 0-100 之間")
         
         elif field.endswith('Price') or field.endswith('Cost') or field.endswith('Amount'):
-            if not isinstance(value, (int, float)) or value < 0:
+            num_value = safe_float_check(value)
+            if num_value is None:
+                invalid_fields.append(f"{field} 必須是有效數值")
+            elif num_value < 0:
                 invalid_fields.append(f"{field} 必須大於等於 0")
     
     errors = []
