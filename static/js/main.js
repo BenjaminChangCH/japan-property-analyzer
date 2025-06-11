@@ -342,11 +342,12 @@ document.addEventListener('DOMContentLoaded', function () {
     /**
      * Creates a standard table row for financial data.
      * @param {string} label - The label for the data point.
-     * @param {number} value - The value in TWD (已轉換成台幣).
+     * @param {number} valueJPY - The value in JPY (万円).
+     * @param {number} valueTWD - The value in TWD (萬台幣).
      * @param {string} tooltipText - The help text for the tooltip.
      * @returns {HTMLTableRowElement} The created table row element.
      */
-    function createRow(label, value, tooltipText) {
+    function createRow(label, valueJPY, valueTWD, tooltipText) {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td>
@@ -356,7 +357,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     <span class="tooltiptext">${tooltipText}</span>
                 </div>
             </td>
-            <td class="value-cell ${value > 0 ? 'positive' : value < 0 ? 'negative' : ''}">${formatCurrency(value)}</td>
+            <td class="value-cell ${valueJPY > 0 ? 'positive' : valueJPY < 0 ? 'negative' : ''}">${formatCurrency(valueJPY)}</td>
+            <td class="value-cell ${valueTWD > 0 ? 'positive' : valueTWD < 0 ? 'negative' : ''}">${formatCurrency(valueTWD)}</td>
         `;
         return tr;
     }
@@ -394,32 +396,34 @@ document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('totalLoanAmountJPY').textContent = formatCurrency(results.initial_investment.loan_amount_jpy + results.initial_investment.down_payment_credit_loan_jpy);
         document.getElementById('totalLoanAmountTWD').textContent = formatCurrency(results.initial_investment.loan_amount_twd + results.initial_investment.down_payment_credit_loan_twd);
         
-        // --- 3. Cash Flow Breakdown (New Single Column Format) ---
+        // --- 3. Cash Flow Breakdown (Dual Column Format: JPY + TWD) ---
         const cashFlowBody = document.getElementById('cashFlowBreakdown');
         cashFlowBody.innerHTML = ''; // Clear previous results
         
         const cf = results.cash_flow;
-        cashFlowBody.appendChild(createRow('總租金收入', cf.total_revenue_stable_twd, '根據您的營運模式、入住率、租金等參數計算出的年度總收入。'));
-        cashFlowBody.appendChild(createRow('營運總支出', -cf.total_expenses_stable_twd, '包含物業管理、水電、平台費、清潔、稅務等所有營運相關的年度開銷。'));
+        cashFlowBody.appendChild(createRow('總租金收入', cf.total_revenue_y2, cf.total_revenue_stable_twd, '根據您的營運模式、入住率、租金等參數計算出的年度總收入。'));
+        cashFlowBody.appendChild(createRow('營運總支出', -cf.total_expenses_y2, -cf.total_expenses_stable_twd, '包含物業管理、水電、平台費、清潔、稅務等所有營運相關的年度開銷。'));
         
-        const ebitdaRow = createRow('稅息折舊及攤銷前利潤 (EBITDA)', cf.ebitda_stable_twd, 'EBITDA = 總收入 - 營運總支出。此數據反映了房產本身的核心獲利能力，排除了融資和稅務結構的影響。');
+        const ebitdaRow = createRow('稅息折舊及攤銷前利潤 (EBITDA)', cf.ebitda_y2, cf.ebitda_stable_twd, 'EBITDA = 總收入 - 營運總支出。此數據反映了房產本身的核心獲利能力，排除了融資和稅務結構的影響。');
         ebitdaRow.classList.add('highlight-row');
         cashFlowBody.appendChild(ebitdaRow);
         
-        if (cf.depreciation_twd > 0) {
-            cashFlowBody.appendChild(createRow('建物折舊', -cf.depreciation_twd, '法規允許的非現金開銷，可在帳面上用來抵稅，但不會實際支付現金。'));
+        if (cf.depreciation > 0) {
+            cashFlowBody.appendChild(createRow('建物折舊', -cf.depreciation, -cf.depreciation_twd, '法規允許的非現金開銷，可在帳面上用來抵稅，但不會實際支付現金。'));
         }
-        cashFlowBody.appendChild(createRow('貸款利息', -cf.interest_payment_stable_twd, '每年支付給銀行的貸款利息，隨著本金償還會逐年減少。'));
+        cashFlowBody.appendChild(createRow('貸款利息', -cf.interest_payment_y2, -cf.interest_payment_stable_twd, '每年支付給銀行的貸款利息，隨著本金償還會逐年減少。'));
         
-        const ebtRow = createRow('稅前淨利 (EBT)', cf.ebt_stable_twd, 'EBT = EBITDA - 折舊 - 貸款利息。這是計算應繳稅款的基礎。');
+        const ebtRow = createRow('稅前淨利 (EBT)', cf.ebt_y2, cf.ebt_stable_twd, 'EBT = EBITDA - 折舊 - 貸款利息。這是計算應繳稅款的基礎。');
         ebtRow.classList.add('highlight-row');
         cashFlowBody.appendChild(ebtRow);
         
-        cashFlowBody.appendChild(createRow('應繳稅款', -cf.tax_stable_twd, '根據您的稅前淨利與稅率計算出的應繳稅額。'));
+        cashFlowBody.appendChild(createRow('應繳稅款', -cf.tax_y2, -cf.tax_stable_twd, '根據您的稅前淨利與稅率計算出的應繳稅額。'));
 
-        // Net Cash Flow Total (Single Column)
-        document.getElementById('netCashFlow_stable').textContent = formatCurrency(cf.net_cash_flow_stable_twd);
-        document.getElementById('netCashFlow_stable').className = `value-cell ${cf.net_cash_flow_stable_twd > 0 ? 'positive' : cf.net_cash_flow_stable_twd < 0 ? 'negative' : ''}`;
+        // Net Cash Flow Totals (Dual Column)
+        document.getElementById('netCashFlow_stable_jpy').textContent = formatCurrency(cf.net_cash_flow_y2);
+        document.getElementById('netCashFlow_stable_jpy').className = `value-cell ${cf.net_cash_flow_y2 > 0 ? 'positive' : cf.net_cash_flow_y2 < 0 ? 'negative' : ''}`;
+        document.getElementById('netCashFlow_stable_twd').textContent = formatCurrency(cf.net_cash_flow_stable_twd);
+        document.getElementById('netCashFlow_stable_twd').className = `value-cell ${cf.net_cash_flow_stable_twd > 0 ? 'positive' : cf.net_cash_flow_stable_twd < 0 ? 'negative' : ''}`;
 
 
         // --- 4. Annual Projections Table ---
