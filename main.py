@@ -346,7 +346,8 @@ def calculate():
             "net_cash_flow": (cash_flows[year] if year < len(cash_flows) else 0) / MAN_EN,
             "property_value": current_property_value / MAN_EN,  # 轉換為萬円
             "loan_balance": projection_loan_balance / MAN_EN,  # 轉換為萬円
-            "net_equity": net_equity / MAN_EN  # 轉換為萬円
+            "net_equity": net_equity / MAN_EN,  # 轉換為萬円
+            "net_equity_twd": (net_equity / MAN_EN) * exchange_rate  # 轉換為萬台幣
         })
 
     results = {

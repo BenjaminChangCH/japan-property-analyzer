@@ -149,7 +149,8 @@ th {
 #annual-projections table td:nth-child(2),
 #annual-projections table td:nth-child(3),
 #annual-projections table td:nth-child(4),
-#annual-projections table td:nth-child(5) {
+#annual-projections table td:nth-child(5),
+#annual-projections table td:nth-child(6) {
     text-align: right;
     font-family: monospace, 'Noto Sans TC';
 }
