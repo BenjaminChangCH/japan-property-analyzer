@@ -201,16 +201,16 @@ python scripts/version_manager.py release minor "新增功能"
 python scripts/version_manager.py release major "重大更新"
 ```
 
-### **發佈管理**
+### **備份管理**
 ```bash
-# 查看發佈狀態
-python scripts/release_manager.py status
+# 創建代碼備份
+python scripts/backup_manager.py backup
 
-# 部署到 STG
-python scripts/release_manager.py deploy-stg 1.1.0
+# 查看備份列表
+python scripts/backup_manager.py list
 
-# 完整發佈流程
-python scripts/release_manager.py full-release 1.1.0
+# 清理舊備份
+python scripts/backup_manager.py cleanup
 ```
 
 ## 📊 **監控與告警**
