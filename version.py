@@ -20,7 +20,7 @@ APP_AUTHOR = "Benjamin Chang"
 APP_URL = "https://github.com/your-username/japan-property-analyzer"
 
 # 發佈資訊
-RELEASE_DATE = "2024-12-12"
+RELEASE_DATE = "2025-06-12"
 BUILD_NUMBER = None  # 將由 CI/CD 系統自動設定
 
 def get_version():
