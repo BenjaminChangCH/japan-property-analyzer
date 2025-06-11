@@ -1,0 +1,56 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches:
+      - feature/*
+      - develop
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_ID }}/locations/global/workloadIdentityPools/${{ secrets.WIF_POOL_ID }}/providers/${{ secrets.WIF_PROVIDER_ID }}'
+        service_account: '${{ secrets.GCP_SA_EMAIL }}'
+
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    - name: 'Submit to Cloud Build for Staging'
+      run: |
+        gcloud builds submit --config deployment/cloudbuild-staging.yaml . 
+      env:
+        CLOUDSDK_CORE_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: 'Get Staging URL'
+      id: staging_url
+      run: |
+        STG_URL=$(gcloud run services describe japan-property-analyzer-stg --region=asia-northeast1 --format='value(status.url)')
+        echo "staging_url=$STG_URL" >> $GITHUB_OUTPUT
+        echo "🚀 Staging deployed at: $STG_URL"
+
+    - name: 'Comment PR with Staging URL'
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🚀 **Staging Environment Ready!**\n\n📋 **Preview URL:** ${{ steps.staging_url.outputs.staging_url }}\n\n✅ Please test the changes before merging.'
+          }) 

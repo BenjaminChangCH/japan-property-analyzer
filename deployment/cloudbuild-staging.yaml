@@ -46,7 +46,7 @@ steps:
     - '-c'
     - |
       source /workspace/build_vars.env
-      gcloud run deploy japan-property-analyzer \
+      gcloud run deploy japan-property-analyzer-stg \
         --image gcr.io/$PROJECT_ID/japan-property-analyzer:$$IMAGE_TAG \
         --region asia-northeast1 \
         --platform managed \
