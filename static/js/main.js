@@ -437,6 +437,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td class="value-cell">${formatCurrency(item.property_value)}</td>
                 <td class="value-cell">${formatCurrency(item.loan_balance)}</td>
                 <td class="value-cell ${item.net_equity > 0 ? 'positive' : item.net_equity < 0 ? 'negative' : ''}">${formatCurrency(item.net_equity)}</td>
+                <td class="value-cell ${item.net_equity_twd > 0 ? 'positive' : item.net_equity_twd < 0 ? 'negative' : ''}">${formatCurrency(item.net_equity_twd)}</td>
             `;
             annualTableBody.appendChild(row);
         });
