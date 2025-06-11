@@ -683,12 +683,15 @@
 
                 <div id="cash-flow-details" class="result-section">
                     <h4>年度現金流分析</h4>
+                    <p class="analysis-note">
+                        <strong>※ 計算說明：</strong>首年一次性收入（如禮金、押金等）並未扣除投資額，而是作為第一年額外收入計算，
+                        以下現金流為穩定營運後的年度表現，並以台幣顯示便於理解。
+                    </p>
                     <table class="results-table" id="cashFlowAnalysisTable">
                         <thead>
                             <tr class="header-row">
                                 <th>項目</th>
-                                <th>第一年現金流 (万円)</th>
-                                <th>續年現金流 (万円)</th>
+                                <th>年度現金流 (萬台幣)</th>
                             </tr>
                         </thead>
                         <tbody id="cashFlowBreakdown">
@@ -697,8 +700,7 @@
                         <tfoot class="total-row">
                             <tr>
                                 <td><strong>稅後淨現金流</strong></td>
-                                <td id="netCashFlow_y1" class="value-cell"></td>
-                                <td id="netCashFlow_y2" class="value-cell"></td>
+                                <td id="netCashFlow_stable" class="value-cell"></td>
                             </tr>
                         </tfoot>
                     </table>
