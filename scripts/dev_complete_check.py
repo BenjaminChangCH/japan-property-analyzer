@@ -464,7 +464,47 @@ git push origin {self.current_branch}
         else:
             print("\n⚠️  請先解決失敗項目再進行部署")
         
-        print(f"\n📋 詳細報告: docs/{report_file.name}")
+        # 檢查 Git 狀態
+        has_uncommitted_changes = False
+        for msg in self.check_results['warnings']:
+            if "有未提交的變更" in msg:
+                has_uncommitted_changes = True
+                break
+        
+        print("\n📝 下一步行動建議：")
+
+        if has_uncommitted_changes:
+            print("   您有未提交的變更。請先提交這些變更，這是部署前的必要步驟。")
+            print("   1. 暫存所有變更：`git add .`")
+            print("   2. 提交變更：`git commit -m \"feat: [您的提交訊息，請遵循 Commit 訊息規範]\"`")
+            print("      - Commit 訊息規範：`feat:` 新功能, `fix:` 錯誤修復, `docs:` 文檔更新, `style:` 程式碼格式調整, `refactor:` 程式碼重構, `test:` 測試相關, `chore:` 建置工具或輔助工具的變動")
+            print("   **請在提交變更後再次執行 `/complete` 指令，以更新專案狀態。**")
+        else:
+            if self.current_branch.startswith('feature/'):
+                print("   當前為功能開發分支 (`feature/{}`)。".format(self.current_branch.split('/', 1)[1]))
+                print("   1. 推送代碼到遠端：`git push origin {}`".format(self.current_branch))
+                print("      - 這將會自動觸發 STG 測試環境的部署。")
+                print("      - STG 網址：https://japan-property-analyzer-864942598341.asia-northeast1.run.app")
+                print("   2. 在 STG 環境進行功能測試和審查。")
+                print("   3. 測試通過後，請創建 Pull Request (PR) 到 `main` 分支。")
+                print("      - PRD 部署將在 PR 合併到 `main` 分支後自動觸發。")
+                print("      - PRD 網址：https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app")
+            elif self.current_branch == 'main':
+                print("   當前為 `main` 分支。")
+                print("   `main` 分支的部署是通過合併 Pull Request (PR) 到 `main` 分支自動觸發的。")
+                print("   1. 確保所有功能已在 STG 環境充分測試。")
+                print("   2. 確保相關的 Pull Request 已被審查並合併。")
+                print("   3. 確認 PRD 環境已自動部署並正常運行：https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app")
+            else:
+                print("   當前分支 (`{}`) 不屬於標準功能或主分支，請手動進行後續操作。".format(self.current_branch))
+            
+            print("\n💡 最佳實踐建議：")
+            print("   - 每次主要功能開發完成後，請執行 `python scripts/cursor_commands.py complete` 進行全面檢查。")
+            print("   - 定期查看 `docs/PRD.md` 和 `docs/CHANGELOG.md` 確保文檔同步更新。")
+            print("   - 遵循 `.cursorrules` 中定義的程式碼風格、版本控制和部署規範。")
+        
+        print("\n---\n")
+        print("📋 詳細報告: docs/completion_report_{}.md".format(datetime.now().strftime('%Y-%m-%d_%H-%M-%S')))
         
         return len(self.check_results['failed']) == 0
 
