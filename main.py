@@ -322,6 +322,78 @@ def calculate():
             payback_period = i + (total_initial_investment - (cumulative_cash_flow - cf)) / cf
             break
     
+    # === 新增槓桿風險指標計算 ===
+    
+    # 1. 計算年度債務服務總額 (Annual Debt Service - ADS)
+    annual_debt_service = (monthly_payment + credit_loan_payment) * 12
+    
+    # 2. 計算年度淨營運收入 (Net Operating Income - NOI)
+    # NOI = 總收入 - 營運費用 (不包含融資成本、折舊、稅務)
+    annual_noi = (monthly_gross_revenue * 12) - (monthly_operating_expenses * 12) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost
+    
+    # 3. DCR (Debt Coverage Ratio) - 債務覆蓋率
+    dcr = annual_noi / annual_debt_service if annual_debt_service > 0 else float('inf')
+    
+    # 4. DSCR (Debt Service Coverage Ratio) - 債務償付覆蓋率  
+    # 使用穩定年度的 EBITDA
+    annual_ebitda_stable = (monthly_gross_revenue * 12) - (monthly_operating_expenses * 12)
+    dscr = annual_ebitda_stable / annual_debt_service if annual_debt_service > 0 else float('inf')
+    
+    # 5. LTV (Loan-to-Value) - 貸款價值比
+    total_loan_amount = loan_amount + credit_loan_for_down_payment_amount
+    ltv = (total_loan_amount / property_price) * 100 if property_price > 0 else 0
+    
+    # 6. 槓桿倍數 (Leverage Ratio)
+    leverage_ratio = total_loan_amount / total_initial_investment if total_initial_investment > 0 else 0
+    
+    # 7. 槓桿後 ROE (Leveraged Return on Equity)
+    # 使用稅後淨現金流計算
+    leveraged_roe = (annual_net_cash_flow_stable / total_initial_investment) * 100 if total_initial_investment > 0 else 0
+    
+    # 8. 計算健康度評級
+    def get_health_rating(dcr, dscr, ltv, cocr):
+        """
+        根據關鍵指標計算投資健康度
+        返回: (rating, color, description)
+        """
+        danger_count = 0
+        warning_count = 0
+        
+        # DCR 評估
+        if dcr < 1.10:
+            danger_count += 1
+        elif dcr < 1.25:
+            warning_count += 1
+            
+        # DSCR 評估  
+        if dscr < 1.15:
+            danger_count += 1
+        elif dscr < 1.30:
+            warning_count += 1
+            
+        # LTV 評估
+        if ltv > 85:
+            danger_count += 1
+        elif ltv > 75:
+            warning_count += 1
+            
+        # CoCR 評估
+        if cocr < 3:
+            danger_count += 1
+        elif cocr < 5:
+            warning_count += 1
+        
+        if danger_count >= 2:
+            return ("危險", "danger", "多項關鍵指標低於安全標準，投資風險較高")
+        elif danger_count >= 1 or warning_count >= 3:
+            return ("警告", "warning", "部分指標需要關注，建議優化投資結構")
+        elif warning_count >= 1:
+            return ("良好", "good", "整體表現良好，少數指標有改善空間")
+        else:
+            return ("優秀", "excellent", "各項指標表現優異，投資結構健康")
+    
+    health_rating, health_color, health_description = get_health_rating(dcr, dscr, ltv, cash_on_cash_return)
+    
     # 準備年度預測數據
     annual_projections = []
     current_property_value = property_price
@@ -355,6 +427,20 @@ def calculate():
             "cash_on_cash_return": cash_on_cash_return,
             "irr": irr * 100 if irr else 0,  # 轉換為百分比
             "payback_period": payback_period
+        },
+        "leverage_metrics": {
+            "dcr": dcr,
+            "dscr": dscr, 
+            "ltv": ltv,
+            "leverage_ratio": leverage_ratio,
+            "leveraged_roe": leveraged_roe,
+            "annual_debt_service_jpy": annual_debt_service / MAN_EN,
+            "annual_debt_service_twd": (annual_debt_service / MAN_EN) * exchange_rate,
+            "annual_noi_jpy": annual_noi / MAN_EN,
+            "annual_noi_twd": (annual_noi / MAN_EN) * exchange_rate,
+            "health_rating": health_rating,
+            "health_color": health_color,
+            "health_description": health_description
         },
         "initial_investment": {
             "total_investment_jpy": total_initial_investment / MAN_EN,

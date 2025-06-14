@@ -1,6 +1,6 @@
 # 🏠 日本不動產投資分析工具
 
-一個專業的日本不動產投資財務分析 Web 應用程式，幫助投資者分析不同投資策略的財務回報。
+這是一個專業的日本不動產投資財務分析 Web 應用程式，旨在幫助投資者分析不同投資策略的財務回報。本應用程式基於 Flask (Python) 開發，並計劃未來擴展為 iOS/Android 應用程式。
 
 ## 🚀 快速開始
 
@@ -135,4 +135,34 @@ Benjamin Chang - 專案維護者
 
 ---
 
-**開發提示**: 建議每次開發完成後使用 `python scripts/cursor_commands.py complete` 進行完整檢查，確保程式碼品質和專案一致性。 
+**開發提示**: 建議每次開發完成後使用 `python scripts/cursor_commands.py complete` 進行完整檢查，確保程式碼品質和專案一致性。
+
+## 專案進度管理
+
+本專案的詳細功能需求、開發進度與狀態追蹤，請參閱 `docs/PRD.md` 文件。所有模組的完成度、版本資訊和未來規劃都將在該文件中維護。
+
+## 技術棧
+
+- **後端**: Python 3.11+, Flask
+- **前端**: HTML, CSS, JavaScript
+- **部署**: Google Cloud Platform (Cloud Run)
+
+## 目錄結構
+
+```
+/
+├── main.py                 # 主應用程式
+├── config/                 # 配置模組
+├── templates/              # HTML 模板
+├── static/                 # 靜態資源
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── tests/                  # 測試檔案
+├── docs/                   # 文件 (含 PRD.md)
+├── deployment/             # 部署相關
+└── scripts/                # 工具腳本
+```
+
+---
+*最新更新日期: 2024-07-29* 

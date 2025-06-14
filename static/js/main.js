@@ -340,6 +340,38 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     /**
+     * 根據指標值返回健康度 CSS 類別
+     * @param {number} value - 指標值
+     * @param {number} excellentThreshold - 優秀門檻
+     * @param {number} warningThreshold - 警告門檻
+     * @returns {string} - CSS 類別名稱
+     */
+    function getHealthClass(value, excellentThreshold, warningThreshold) {
+        if (value >= excellentThreshold) {
+            return 'excellent';
+        } else if (value >= warningThreshold) {
+            return 'good';
+        } else {
+            return 'danger';
+        }
+    }
+
+    /**
+     * LTV 特殊的健康度分級（數值越低越好）
+     * @param {number} ltv - LTV 百分比
+     * @returns {string} - CSS 類別名稱
+     */
+    function getLTVHealthClass(ltv) {
+        if (ltv <= 75) {
+            return 'excellent';
+        } else if (ltv <= 85) {
+            return 'good';
+        } else {
+            return 'danger';
+        }
+    }
+
+    /**
      * Creates a standard table row for financial data.
      * @param {string} label - The label for the data point.
      * @param {number} valueJPY - The value in JPY (万円).
@@ -368,15 +400,51 @@ document.addEventListener('DOMContentLoaded', function () {
      * @param {object} results - The analysis results from the backend.
      */
     function displayResults(results) {
-        // --- 1. Key Performance Indicators (KPIs) ---
+        // 儲存計算結果供指標調整功能使用
+        lastCalculationData = results;
+        
+        // --- 1. 投資健康度評估 ---
+        const healthBadge = document.getElementById('healthBadge');
+        const healthRating = document.getElementById('healthRating');
+        const healthDescription = document.getElementById('healthDescription');
+        
+        healthRating.textContent = results.leverage_metrics.health_rating;
+        healthDescription.textContent = results.leverage_metrics.health_description;
+        
+        // 設定健康度顏色
+        healthBadge.className = `health-badge ${results.leverage_metrics.health_color}`;
+        
+        // --- 2. 基本投資人版本 KPIs ---
         const cashOnCashEl = document.getElementById('cashOnCashReturn');
         cashOnCashEl.textContent = `${formatCurrency(results.kpi.cash_on_cash_return, 2)}%`;
-        cashOnCashEl.className = `value-cell ${results.kpi.cash_on_cash_return > 0 ? 'positive' : 'negative'}`;
+        cashOnCashEl.className = `value-cell ${getHealthClassDynamic(results.kpi.cash_on_cash_return, 'cocr')}`;
+        
+        const dcrEl = document.getElementById('dcrValue');
+        dcrEl.textContent = formatCurrency(results.leverage_metrics.dcr, 2);
+        dcrEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.dcr, 'dcr')}`;
+        
+        const ltvEl = document.getElementById('ltvValue');
+        ltvEl.textContent = `${formatCurrency(results.leverage_metrics.ltv, 1)}%`;
+        ltvEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.ltv, 'ltv')}`;
         
         const totalROIEl = document.getElementById('totalROI');
         totalROIEl.textContent = `${formatCurrency(results.kpi.irr, 2)}%`;
-        totalROIEl.className = `value-cell ${results.kpi.irr > 0 ? 'positive' : 'negative'}`;
+        totalROIEl.className = `value-cell ${getHealthClassDynamic(results.kpi.irr, 'irr')}`;
         
+        // --- 3. 專業投資人版本指標 ---
+        const dscrEl = document.getElementById('dscrValue');
+        dscrEl.textContent = formatCurrency(results.leverage_metrics.dscr, 2);
+        dscrEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.dscr, 'dscr')}`;
+        
+        const leverageEl = document.getElementById('leverageRatio');
+        leverageEl.textContent = formatCurrency(results.leverage_metrics.leverage_ratio, 2);
+        leverageEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.leverage_ratio, 'leverage')}`;
+        
+        const leveragedROEEl = document.getElementById('leveragedROE');
+        leveragedROEEl.textContent = `${formatCurrency(results.leverage_metrics.leveraged_roe, 2)}%`;
+        leveragedROEEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.leveraged_roe, 'irr')}`;
+        document.getElementById('annualDebtService').textContent = `${formatCurrency(results.leverage_metrics.annual_debt_service_jpy)}萬円 (${formatCurrency(results.leverage_metrics.annual_debt_service_twd)}萬台幣)`;
+        document.getElementById('annualNOI').textContent = `${formatCurrency(results.leverage_metrics.annual_noi_jpy)}萬円 (${formatCurrency(results.leverage_metrics.annual_noi_twd)}萬台幣)`;
         document.getElementById('paybackPeriod').textContent = `${results.kpi.payback_period > 0 ? formatCurrency(results.kpi.payback_period, 1) + ' 年' : '無法回收'}`;
 
         // --- 2. Initial Investment ---
@@ -519,5 +587,192 @@ document.addEventListener('DOMContentLoaded', function () {
         showLoading(false); // Hide loading overlay once everything is ready
     }
 
+    // 全域變數儲存指標閾值
+    let thresholds = {
+        dcr: { safe: 1.25, warning: 1.10 },
+        cocr: { excellent: 5, good: 3 },
+        ltv: { conservative: 75, moderate: 85 },
+        irr: { excellent: 8, good: 5 },
+        dscr: { healthy: 1.30, warning: 1.15 },
+        leverage: { conservative: 3.0, moderate: 5.0 }
+    };
+
+    // 儲存最後一次計算結果，用於重新評估健康度
+    let lastCalculationData = null;
+
+    // 更新健康度分類函數以使用動態閾值
+    function getHealthClassDynamic(value, type) {
+        switch(type) {
+            case 'cocr':
+                if (value >= thresholds.cocr.excellent) return 'excellent';
+                if (value >= thresholds.cocr.good) return 'good';
+                return 'danger';
+            case 'dcr':
+                if (value >= thresholds.dcr.safe) return 'excellent';
+                if (value >= thresholds.dcr.warning) return 'good';
+                return 'danger';
+            case 'ltv':
+                if (value <= thresholds.ltv.conservative) return 'excellent';
+                if (value <= thresholds.ltv.moderate) return 'good';
+                return 'danger';
+            case 'irr':
+                if (value >= thresholds.irr.excellent) return 'excellent';
+                if (value >= thresholds.irr.good) return 'good';
+                return 'danger';
+            case 'dscr':
+                if (value >= thresholds.dscr.healthy) return 'excellent';
+                if (value >= thresholds.dscr.warning) return 'good';
+                return 'danger';
+            case 'leverage':
+                if (value <= thresholds.leverage.conservative) return 'excellent';
+                if (value <= thresholds.leverage.moderate) return 'good';
+                return 'danger';
+            default:
+                return 'good';
+        }
+    }
+
+    // 更新健康指標顯示
+    function updateHealthIndicators(results) {
+        if (!results) return;
+        
+        // 更新基本投資人版本的健康度顏色
+        const cashOnCashEl = document.getElementById('cashOnCashReturn');
+        if (cashOnCashEl) {
+            cashOnCashEl.className = `value-cell ${getHealthClassDynamic(results.kpi.cash_on_cash_return, 'cocr')}`;
+        }
+        
+        const dcrEl = document.getElementById('dcrValue');
+        if (dcrEl) {
+            dcrEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.dcr, 'dcr')}`;
+        }
+        
+        const ltvEl = document.getElementById('ltvValue');
+        if (ltvEl) {
+            ltvEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.ltv, 'ltv')}`;
+        }
+        
+        const totalROIEl = document.getElementById('totalROI');
+        if (totalROIEl) {
+            totalROIEl.className = `value-cell ${getHealthClassDynamic(results.kpi.irr, 'irr')}`;
+        }
+
+        // 更新專業投資人版本的健康度顏色
+        const dscrEl = document.getElementById('dscrValue');
+        if (dscrEl) {
+            dscrEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.dscr, 'dscr')}`;
+        }
+        
+        const leverageEl = document.getElementById('leverageRatio');
+        if (leverageEl) {
+            leverageEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.leverage_ratio, 'leverage')}`;
+        }
+        
+        const leveragedROEEl = document.getElementById('leveragedROE');
+        if (leveragedROEEl) {
+            leveragedROEEl.className = `value-cell ${getHealthClassDynamic(results.leverage_metrics.leveraged_roe, 'irr')}`;
+        }
+    }
+
+    // 切換基本版、專業版和指標調整顯示
+    function setupViewToggle() {
+        const basicViewBtn = document.getElementById('basicViewBtn');
+        const professionalViewBtn = document.getElementById('professionalViewBtn');
+        const adjustmentViewBtn = document.getElementById('adjustmentViewBtn');
+        const basicView = document.getElementById('basicInvestorView');
+        const professionalView = document.getElementById('professionalInvestorView');
+        const adjustmentView = document.getElementById('adjustmentView');
+
+        if (basicViewBtn && professionalViewBtn && adjustmentViewBtn && basicView && professionalView && adjustmentView) {
+            basicViewBtn.addEventListener('click', () => {
+                basicView.style.display = 'block';
+                professionalView.style.display = 'none';
+                adjustmentView.style.display = 'none';
+                basicViewBtn.classList.add('active');
+                professionalViewBtn.classList.remove('active');
+                adjustmentViewBtn.classList.remove('active');
+            });
+
+            professionalViewBtn.addEventListener('click', () => {
+                basicView.style.display = 'none';
+                professionalView.style.display = 'block';
+                adjustmentView.style.display = 'none';
+                professionalViewBtn.classList.add('active');
+                basicViewBtn.classList.remove('active');
+                adjustmentViewBtn.classList.remove('active');
+            });
+
+            adjustmentViewBtn.addEventListener('click', () => {
+                basicView.style.display = 'none';
+                professionalView.style.display = 'none';
+                adjustmentView.style.display = 'block';
+                adjustmentViewBtn.classList.add('active');
+                basicViewBtn.classList.remove('active');
+                professionalViewBtn.classList.remove('active');
+            });
+        }
+
+        // 指標調整功能
+        const resetBtn = document.getElementById('resetThresholdsBtn');
+        const applyBtn = document.getElementById('applyThresholdsBtn');
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', () => {
+                // 重設為預設值
+                document.getElementById('dcrSafeThreshold').value = 1.25;
+                document.getElementById('dcrWarningThreshold').value = 1.10;
+                document.getElementById('cocrExcellentThreshold').value = 5;
+                document.getElementById('cocrGoodThreshold').value = 3;
+                document.getElementById('ltvConservativeThreshold').value = 75;
+                document.getElementById('ltvModerateThreshold').value = 85;
+                document.getElementById('irrExcellentThreshold').value = 8;
+                document.getElementById('irrGoodThreshold').value = 5;
+                document.getElementById('dscrHealthyThreshold').value = 1.30;
+                document.getElementById('dscrWarningThreshold').value = 1.15;
+                document.getElementById('leverageConservativeThreshold').value = 3.0;
+                document.getElementById('leverageModerateThreshold').value = 5.0;
+                
+                // 更新全域閾值
+                thresholds = {
+                    dcr: { safe: 1.25, warning: 1.10 },
+                    cocr: { excellent: 5, good: 3 },
+                    ltv: { conservative: 75, moderate: 85 },
+                    irr: { excellent: 8, good: 5 },
+                    dscr: { healthy: 1.30, warning: 1.15 },
+                    leverage: { conservative: 3.0, moderate: 5.0 }
+                };
+                
+                alert('已重設為預設值！請點擊「套用調整」以更新指標評級。');
+            });
+        }
+
+        if (applyBtn) {
+            applyBtn.addEventListener('click', () => {
+                // 讀取用戶設定的閾值
+                thresholds.dcr.safe = parseFloat(document.getElementById('dcrSafeThreshold').value);
+                thresholds.dcr.warning = parseFloat(document.getElementById('dcrWarningThreshold').value);
+                thresholds.cocr.excellent = parseFloat(document.getElementById('cocrExcellentThreshold').value);
+                thresholds.cocr.good = parseFloat(document.getElementById('cocrGoodThreshold').value);
+                thresholds.ltv.conservative = parseFloat(document.getElementById('ltvConservativeThreshold').value);
+                thresholds.ltv.moderate = parseFloat(document.getElementById('ltvModerateThreshold').value);
+                thresholds.irr.excellent = parseFloat(document.getElementById('irrExcellentThreshold').value);
+                thresholds.irr.good = parseFloat(document.getElementById('irrGoodThreshold').value);
+                thresholds.dscr.healthy = parseFloat(document.getElementById('dscrHealthyThreshold').value);
+                thresholds.dscr.warning = parseFloat(document.getElementById('dscrWarningThreshold').value);
+                thresholds.leverage.conservative = parseFloat(document.getElementById('leverageConservativeThreshold').value);
+                thresholds.leverage.moderate = parseFloat(document.getElementById('leverageModerateThreshold').value);
+                
+                // 重新計算並更新顯示
+                if (lastCalculationData) {
+                    updateHealthIndicators(lastCalculationData);
+                    alert('指標調整已套用！所有健康評級已根據新標準更新。');
+                } else {
+                    alert('請先進行財務計算，再套用指標調整。');
+                }
+            });
+        }
+    }
+
     initialize();
+    setupViewToggle();
 }); 
