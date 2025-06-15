@@ -64,6 +64,21 @@ def callback():
         current_app.logger.error("Google OAuth 未正確配置")
         return jsonify({'error': '認證服務未正確配置'}), 500
     
+    # 檢查是否有錯誤參數
+    error = request.args.get('error')
+    if error:
+        current_app.logger.error(f"OAuth 錯誤: {error}")
+        error_description = request.args.get('error_description', '')
+        flash(f'登入失敗：{error_description or error}', 'error')
+        return redirect(url_for('index'))
+    
+    # 檢查是否有授權碼
+    code = request.args.get('code')
+    if not code:
+        current_app.logger.error("缺少授權碼")
+        flash('登入失敗：缺少授權碼', 'error')
+        return redirect(url_for('index'))
+    
     # 驗證 state 參數
     received_state = request.args.get('state')
     session_state = session.get('oauth_state')

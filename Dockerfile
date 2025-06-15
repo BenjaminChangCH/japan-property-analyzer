@@ -1,5 +1,5 @@
-# Use the official Python image as a base image
-FROM python:3.11-slim-buster
+# Use the official Python image as a base image (更新到 bookworm 以修復安全漏洞)
+FROM python:3.11-slim-bookworm
 
 # 建置參數
 ARG VERSION="unknown"
@@ -9,12 +9,19 @@ ARG BUILD_NUMBER="unknown"
 ENV APP_VERSION=$VERSION
 ENV BUILD_NUMBER=$BUILD_NUMBER
 
+# 安全更新和清理
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
 # Set the working directory in the container
 WORKDIR /app
 
 # Copy the requirements file and install dependencies
 COPY requirements.txt ./requirements.txt
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy the main application files
 COPY main.py .
