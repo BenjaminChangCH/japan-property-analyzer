@@ -46,12 +46,17 @@ steps:
     - '-c'
     - |
       source /workspace/build_vars.env
+      
+      # 獲取 OAuth 憑證
+      GOOGLE_CLIENT_ID=$(gcloud secrets versions access latest --secret=google-oauth-client-id)
+      GOOGLE_CLIENT_SECRET=$(gcloud secrets versions access latest --secret=google-oauth-client-secret)
+      
       gcloud run deploy japan-property-analyzer \
         --image gcr.io/$PROJECT_ID/japan-property-analyzer:$$IMAGE_TAG \
         --region asia-northeast1 \
         --platform managed \
         --allow-unauthenticated \
-        --set-env-vars GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=staging,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=true,SECRET_KEY=8ec8f8b4ba20148030b64d6a6cc5cccca92fce3fd2dc09c5ddeb6f6cd723a868,GOOGLE_CLIENT_ID=$$(gcloud secrets versions access latest --secret=google-oauth-client-id),GOOGLE_CLIENT_SECRET=$$(gcloud secrets versions access latest --secret=google-oauth-client-secret) \
+        --set-env-vars GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=staging,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=true,SECRET_KEY=8ec8f8b4ba20148030b64d6a6cc5cccca92fce3fd2dc09c5ddeb6f6cd723a868,GOOGLE_CLIENT_ID=$$GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET=$$GOOGLE_CLIENT_SECRET \
         --memory 1Gi \
         --cpu 1 \
         --max-instances 10 \
