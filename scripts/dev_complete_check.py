@@ -161,7 +161,7 @@ class DevCompleteChecker:
         required_docs = [
             ('README.md', '專案說明文檔'),
             ('docs/PRD.md', '產品需求文檔'),
-            ('docs/CODE_ANALYSIS.md', '程式碼分析文檔'),
+            ('docs/guides/CODE_ANALYSIS.md', '程式碼分析文檔'),
             ('.cursorrules', 'Cursor 規則文檔')
         ]
         

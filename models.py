@@ -30,6 +30,26 @@ class User(UserMixin, db.Model):
     def __repr__(self):
         return f'<User {self.email}>'
     
+    # Flask-Login 必需方法
+    def get_id(self):
+        """返回用戶唯一標識符"""
+        return str(self.id)
+    
+    @property
+    def is_authenticated(self):
+        """檢查用戶是否已認證"""
+        return True
+    
+    @property
+    def is_active(self):
+        """檢查用戶是否啟用"""
+        return True
+    
+    @property
+    def is_anonymous(self):
+        """檢查用戶是否匿名"""
+        return False
+    
     def get_preferences(self):
         """獲取用戶偏好設定"""
         if self.preferences:

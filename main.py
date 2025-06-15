@@ -39,6 +39,12 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 # 設定 Flask 密鑰
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
+# 會話配置
+app.config['SESSION_COOKIE_SECURE'] = False  # 開發環境設為 False，生產環境應為 True
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24小時
+
 # 設定資料庫
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -508,7 +514,44 @@ def calculate():
             "loan_amount_twd": (loan_amount / MAN_EN) * exchange_rate
         },
         "cash_flow": {
-            # 保留原始日幣數據供內部使用
+            # 使用穩定年度（第二年）的數據進行計算，確保數字一致性
+            # 1. 總租金收入
+            "total_revenue_jpy": monthly_gross_revenue * 12 / MAN_EN,
+            "total_revenue_twd": ((monthly_gross_revenue * 12) / MAN_EN) * exchange_rate,
+            
+            # 2. 營運總支出（僅包含直接營運費用）
+            "operating_expenses_jpy": monthly_operating_expenses * 12 / MAN_EN,
+            "operating_expenses_twd": ((monthly_operating_expenses * 12) / MAN_EN) * exchange_rate,
+            
+            # 3. EBITDA = 總收入 - 營運支出
+            "ebitda_jpy": (monthly_gross_revenue * 12 - monthly_operating_expenses * 12) / MAN_EN,
+            "ebitda_twd": ((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) / MAN_EN) * exchange_rate,
+            
+            # 4. 建物折舊
+            "depreciation_jpy": annual_depreciation / MAN_EN,
+            "depreciation_twd": (annual_depreciation / MAN_EN) * exchange_rate,
+            
+            # 5. 貸款利息（使用第二年的利息，因為第一年利息較高）
+            "interest_payment_jpy": (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) / MAN_EN,
+            "interest_payment_twd": ((loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) / MAN_EN) * exchange_rate,
+            
+            # 6. 其他費用（管理費、房屋稅、保險、會計師費）
+            "other_expenses_jpy": ((monthly_management_and_repairs * 12) + (monthly_property_tax * 12) + annual_insurance_cost + annual_tax_accountant_fee) / MAN_EN,
+            "other_expenses_twd": (((monthly_management_and_repairs * 12) + (monthly_property_tax * 12) + annual_insurance_cost + annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
+            
+            # 7. 稅前淨利 (EBT) = EBITDA - 折舊 - 利息 - 其他費用
+            "ebt_jpy": ((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN,
+            "ebt_twd": (((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
+            
+            # 8. 應繳稅款
+            "tax_jpy": annual_tax_y2 / MAN_EN,
+            "tax_twd": (annual_tax_y2 / MAN_EN) * exchange_rate,
+            
+            # 9. 稅後淨現金流
+            "net_cash_flow_jpy": (cash_flows[2] if len(cash_flows) > 2 else (cash_flows[1] if len(cash_flows) > 1 else 0)) / MAN_EN,
+            "net_cash_flow_twd": ((cash_flows[2] if len(cash_flows) > 2 else (cash_flows[1] if len(cash_flows) > 1 else 0)) / MAN_EN) * exchange_rate,
+            
+            # 保留舊版本相容性
             "total_revenue_y1": (monthly_gross_revenue * 12 + one_time_initial_income) / MAN_EN,
             "total_revenue_y2": monthly_gross_revenue * 12 / MAN_EN,
             "total_expenses_y1": monthly_operating_expenses * 12 / MAN_EN,
@@ -523,17 +566,7 @@ def calculate():
             "tax_y1": annual_tax_y1 / MAN_EN,
             "tax_y2": annual_tax_y2 / MAN_EN,
             "net_cash_flow_y1": cash_flows[1] / MAN_EN if len(cash_flows) > 1 else 0,
-            "net_cash_flow_y2": cash_flows[2] / MAN_EN if len(cash_flows) > 2 else (cash_flows[1] / MAN_EN if len(cash_flows) > 1 else 0),
-            
-            # 新增台幣換算的穩定年度現金流（用於新的表格格式）
-            "total_revenue_stable_twd": ((monthly_gross_revenue * 12) / MAN_EN) * exchange_rate,
-            "total_expenses_stable_twd": ((monthly_operating_expenses * 12) / MAN_EN) * exchange_rate,
-            "ebitda_stable_twd": (((monthly_gross_revenue * 12) - (monthly_operating_expenses * 12)) / MAN_EN) * exchange_rate,
-            "depreciation_twd": (annual_depreciation / MAN_EN) * exchange_rate,
-            "interest_payment_stable_twd": ((loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) / MAN_EN) * exchange_rate,
-            "ebt_stable_twd": (((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
-            "tax_stable_twd": (annual_tax_y2 / MAN_EN) * exchange_rate,
-            "net_cash_flow_stable_twd": ((cash_flows[2] if len(cash_flows) > 2 else (cash_flows[1] if len(cash_flows) > 1 else 0)) / MAN_EN) * exchange_rate
+            "net_cash_flow_y2": cash_flows[2] / MAN_EN if len(cash_flows) > 2 else (cash_flows[1] / MAN_EN if len(cash_flows) > 1 else 0)
         },
         "annual_projections": annual_projections,
         "suggestions": []  # 可以後續添加建議邏輯

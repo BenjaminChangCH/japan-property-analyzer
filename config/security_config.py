@@ -42,7 +42,9 @@ def setup_security_headers(app):
         csp = (
             "default-src 'self'; "
             "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; "
-            "img-src 'self' data: https://www.google-analytics.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https://www.google-analytics.com https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com; "
             "connect-src 'self' https://www.google-analytics.com; "
         )
         response.headers['Content-Security-Policy'] = csp

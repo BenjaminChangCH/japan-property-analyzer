@@ -1,6 +1,18 @@
 // 用戶認證相關函數
 let currentUser = null;
 
+// 臨時測試函數 - 模擬用戶登入狀態
+function testUserMode() {
+    const testUser = {
+        name: 'ChunHao Chang',
+        avatar_url: 'https://lh3.googleusercontent.com/a/ACg8ocIa-osqIhhCfm_jr8E_-Mc23g9WlNY4FLMdM31C1JZ3rfPW2A=s96-c',
+        email: 'benjamin.chang10@gmail.com'
+    };
+    
+    console.log('測試用戶模式，設置頭像:', testUser.avatar_url);
+    showUserMode(testUser);
+}
+
 // 檢查用戶登入狀態
 async function checkAuthStatus() {
     try {
@@ -10,6 +22,14 @@ async function checkAuthStatus() {
         if (data.authenticated) {
             currentUser = data.user;
             showUserMode(data.user);
+            
+            // 如果是剛登入，顯示成功提示
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('login') === 'success') {
+                showLoginSuccessToast(data.user.name);
+                // 清除 URL 參數
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         } else {
             currentUser = null;
             showGuestMode();
@@ -22,10 +42,45 @@ async function checkAuthStatus() {
 
 // 顯示用戶模式
 function showUserMode(user) {
+    console.log('顯示用戶模式，用戶資料:', user);
+    
     document.getElementById('guestMode').classList.add('hidden');
     document.getElementById('userMode').classList.remove('hidden');
     document.getElementById('userName').textContent = user.name;
-    document.getElementById('userAvatar').src = user.avatar_url || '/static/images/default-avatar.png';
+    
+    const avatarElement = document.getElementById('userAvatar');
+    const avatarUrl = user.avatar_url || '/static/images/default-avatar.svg';
+    
+    console.log('設置頭像 URL:', avatarUrl);
+    console.log('頭像元素:', avatarElement);
+    
+    if (avatarElement) {
+        // 防止無限重試的標誌
+        let hasTriedDefault = false;
+        
+        avatarElement.src = avatarUrl;
+        avatarElement.onerror = function() {
+            if (!hasTriedDefault && this.src !== '/static/images/default-avatar.svg') {
+                console.log('頭像載入失敗，嘗試使用預設頭像');
+                hasTriedDefault = true;
+                this.src = '/static/images/default-avatar.svg';
+            } else {
+                // 如果預設頭像也失敗，使用文字頭像
+                console.log('預設頭像也載入失敗，使用文字頭像');
+                this.style.display = 'none';
+                const textAvatar = document.createElement('div');
+                textAvatar.className = 'text-avatar';
+                textAvatar.style.cssText = 'width: 32px; height: 32px; background: #3b82f6; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; color: white; font-weight: bold;';
+                textAvatar.textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                this.parentNode.insertBefore(textAvatar, this);
+            }
+        };
+        avatarElement.onload = function() {
+            console.log('頭像載入成功:', this.src);
+        };
+    } else {
+        console.error('找不到 userAvatar 元素');
+    }
 }
 
 // 顯示訪客模式
@@ -34,9 +89,37 @@ function showGuestMode() {
     document.getElementById('userMode').classList.add('hidden');
 }
 
+// 顯示登入成功提示
+function showLoginSuccessToast(userName) {
+    const toast = document.getElementById('loginSuccessToast');
+    const toastText = toast.querySelector('span:last-child');
+    toastText.textContent = `登入成功！歡迎回來，${userName}`;
+    
+    toast.classList.add('show');
+    
+    // 3秒後自動隱藏
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 3000);
+}
+
 // Google 登入
-function login() {
-    window.location.href = '/auth/login';
+function login(event) {
+    console.log('登入按鈕被點擊');
+    
+    // 防止表單提交或其他預設行為
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+    
+    try {
+        console.log('正在重定向到 Google 登入頁面...');
+        window.location.href = '/auth/login';
+    } catch (error) {
+        console.error('登入重定向失敗:', error);
+        alert('登入功能暫時無法使用，請稍後再試');
+    }
 }
 
 // 登出
@@ -54,12 +137,16 @@ function showUserMenu() {
 
 // 顯示個人資料
 function showProfile() {
-    alert('個人資料功能開發中...');
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.add('hidden');
+    alert('個人資料管理功能開發中...\n\n將包含以下功能：\n• 編輯個人資訊\n• 修改偏好設定\n• 查看登入記錄');
 }
 
 // 顯示我的案件
 function showProperties() {
-    alert('案件管理功能開發中...');
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.add('hidden');
+    alert('案件管理功能開發中...\n\n將包含以下功能：\n• 儲存分析案件\n• 案件比較分析\n• 投資組合管理\n• 收藏案件追蹤');
 }
 
 // 點擊其他地方時隱藏下拉選單
@@ -75,6 +162,16 @@ document.addEventListener('click', function(event) {
 document.addEventListener('DOMContentLoaded', function () {
     // 初始化認證狀態
     checkAuthStatus();
+    
+    // 綁定 Google 登入按鈕事件
+    const googleLoginBtn = document.getElementById('googleLoginBtn');
+    if (googleLoginBtn) {
+        googleLoginBtn.addEventListener('click', function(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            login(event);
+        });
+    }
     const expertValues = {
         propertyTypes: {
             '1LDK': {
@@ -545,29 +642,48 @@ document.addEventListener('DOMContentLoaded', function () {
         cashFlowBody.innerHTML = ''; // Clear previous results
         
         const cf = results.cash_flow;
-        cashFlowBody.appendChild(createRow('總租金收入', cf.total_revenue_y2, cf.total_revenue_stable_twd, '根據您的營運模式、入住率、租金等參數計算出的年度總收入。'));
-        cashFlowBody.appendChild(createRow('營運總支出', -cf.total_expenses_y2, -cf.total_expenses_stable_twd, '包含物業管理、水電、平台費、清潔、稅務等所有營運相關的年度開銷。'));
         
-        const ebitdaRow = createRow('稅息折舊及攤銷前利潤 (EBITDA)', cf.ebitda_y2, cf.ebitda_stable_twd, 'EBITDA = 總收入 - 營運總支出。此數據反映了房產本身的核心獲利能力，排除了融資和稅務結構的影響。');
+        // 1. 總租金收入
+        cashFlowBody.appendChild(createRow('總租金收入', cf.total_revenue_jpy, cf.total_revenue_twd, '根據您的營運模式、入住率、租金等參數計算出的年度總收入。'));
+        
+        // 2. 營運總支出（僅包含直接營運費用）
+        cashFlowBody.appendChild(createRow('營運總支出', -cf.operating_expenses_jpy, -cf.operating_expenses_twd, '包含平台費、清潔費、水電費等直接營運相關的年度開銷。'));
+        
+        // 3. EBITDA
+        const ebitdaRow = createRow('稅息折舊及攤銷前利潤 (EBITDA)', cf.ebitda_jpy, cf.ebitda_twd, 'EBITDA = 總收入 - 營運總支出。此數據反映了房產本身的核心獲利能力，排除了融資和稅務結構的影響。');
         ebitdaRow.classList.add('highlight-row');
         cashFlowBody.appendChild(ebitdaRow);
         
-        if (cf.depreciation > 0) {
-            cashFlowBody.appendChild(createRow('建物折舊', -cf.depreciation, -cf.depreciation_twd, '法規允許的非現金開銷，可在帳面上用來抵稅，但不會實際支付現金。'));
+        // 4. 建物折舊
+        if (cf.depreciation_jpy > 0) {
+            cashFlowBody.appendChild(createRow('建物折舊', -cf.depreciation_jpy, -cf.depreciation_twd, '法規允許的非現金開銷，可在帳面上用來抵稅，但不會實際支付現金。'));
         }
-        cashFlowBody.appendChild(createRow('貸款利息', -cf.interest_payment_y2, -cf.interest_payment_stable_twd, '每年支付給銀行的貸款利息，隨著本金償還會逐年減少。'));
         
-        const ebtRow = createRow('稅前淨利 (EBT)', cf.ebt_y2, cf.ebt_stable_twd, 'EBT = EBITDA - 折舊 - 貸款利息。這是計算應繳稅款的基礎。');
+        // 5. 貸款利息
+        if (cf.interest_payment_jpy > 0) {
+            cashFlowBody.appendChild(createRow('貸款利息', -cf.interest_payment_jpy, -cf.interest_payment_twd, '每年支付給銀行的貸款利息，隨著本金償還會逐年減少。'));
+        }
+        
+        // 6. 其他費用（管理費、房屋稅、保險、會計師費等）
+        if (cf.other_expenses_jpy > 0) {
+            cashFlowBody.appendChild(createRow('其他費用 (管理費、稅費等)', -cf.other_expenses_jpy, -cf.other_expenses_twd, '包含物業管理費、房屋稅、保險費、會計師費等其他必要支出。'));
+        }
+        
+        // 7. 稅前淨利 (EBT)
+        const ebtRow = createRow('稅前淨利 (EBT)', cf.ebt_jpy, cf.ebt_twd, 'EBT = EBITDA - 折舊 - 利息 - 其他費用。這是計算應繳稅款的基礎。');
         ebtRow.classList.add('highlight-row');
         cashFlowBody.appendChild(ebtRow);
         
-        cashFlowBody.appendChild(createRow('應繳稅款', -cf.tax_y2, -cf.tax_stable_twd, '根據您的稅前淨利與稅率計算出的應繳稅額。'));
+        // 8. 應繳稅款
+        if (cf.tax_jpy > 0) {
+            cashFlowBody.appendChild(createRow('應繳稅款', -cf.tax_jpy, -cf.tax_twd, '根據您的稅前淨利與稅率計算出的應繳稅額。'));
+        }
 
         // Net Cash Flow Totals (Dual Column)
-        document.getElementById('netCashFlow_stable_jpy').textContent = formatCurrency(cf.net_cash_flow_y2);
-        document.getElementById('netCashFlow_stable_jpy').className = `value-cell ${cf.net_cash_flow_y2 > 0 ? 'positive' : cf.net_cash_flow_y2 < 0 ? 'negative' : ''}`;
-        document.getElementById('netCashFlow_stable_twd').textContent = formatCurrency(cf.net_cash_flow_stable_twd);
-        document.getElementById('netCashFlow_stable_twd').className = `value-cell ${cf.net_cash_flow_stable_twd > 0 ? 'positive' : cf.net_cash_flow_stable_twd < 0 ? 'negative' : ''}`;
+        document.getElementById('netCashFlow_stable_jpy').textContent = formatCurrency(cf.net_cash_flow_jpy);
+        document.getElementById('netCashFlow_stable_jpy').className = `value-cell ${cf.net_cash_flow_jpy > 0 ? 'positive' : cf.net_cash_flow_jpy < 0 ? 'negative' : ''}`;
+        document.getElementById('netCashFlow_stable_twd').textContent = formatCurrency(cf.net_cash_flow_twd);
+        document.getElementById('netCashFlow_stable_twd').className = `value-cell ${cf.net_cash_flow_twd > 0 ? 'positive' : cf.net_cash_flow_twd < 0 ? 'negative' : ''}`;
 
 
         // --- 4. Annual Projections Table ---
@@ -750,41 +866,60 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // 切換基本版、專業版和指標調整顯示
+    // 切換基本版和專業版顯示
     function setupViewToggle() {
         const basicViewBtn = document.getElementById('basicViewBtn');
         const professionalViewBtn = document.getElementById('professionalViewBtn');
-        const adjustmentViewBtn = document.getElementById('adjustmentViewBtn');
         const basicView = document.getElementById('basicInvestorView');
         const professionalView = document.getElementById('professionalInvestorView');
-        const adjustmentView = document.getElementById('adjustmentView');
 
-        if (basicViewBtn && professionalViewBtn && adjustmentViewBtn && basicView && professionalView && adjustmentView) {
+        if (basicViewBtn && professionalViewBtn && basicView && professionalView) {
             basicViewBtn.addEventListener('click', () => {
+                // 顯示/隱藏內容
                 basicView.style.display = 'block';
                 professionalView.style.display = 'none';
-                adjustmentView.style.display = 'none';
+                
+                // 更新按鍵狀態
                 basicViewBtn.classList.add('active');
                 professionalViewBtn.classList.remove('active');
-                adjustmentViewBtn.classList.remove('active');
+                
+                // 平滑滾動到內容區域
+                basicView.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
 
             professionalViewBtn.addEventListener('click', () => {
+                // 顯示/隱藏內容
                 basicView.style.display = 'none';
                 professionalView.style.display = 'block';
-                adjustmentView.style.display = 'none';
+                
+                // 更新按鍵狀態
                 professionalViewBtn.classList.add('active');
                 basicViewBtn.classList.remove('active');
-                adjustmentViewBtn.classList.remove('active');
+                
+                // 平滑滾動到內容區域
+                professionalView.scrollIntoView({ behavior: 'smooth', block: 'start' });
             });
+        }
 
-            adjustmentViewBtn.addEventListener('click', () => {
-                basicView.style.display = 'none';
-                professionalView.style.display = 'none';
-                adjustmentView.style.display = 'block';
-                adjustmentViewBtn.classList.add('active');
-                basicViewBtn.classList.remove('active');
-                professionalViewBtn.classList.remove('active');
+        // 指標調整角落按鈕功能
+        const adjustmentToggleBtn = document.getElementById('adjustmentToggleBtn');
+        const adjustmentPanel = document.getElementById('adjustmentPanel');
+        const closeAdjustmentBtn = document.getElementById('closeAdjustmentBtn');
+
+        if (adjustmentToggleBtn && adjustmentPanel) {
+            adjustmentToggleBtn.addEventListener('click', () => {
+                adjustmentPanel.classList.remove('hidden');
+                adjustmentToggleBtn.classList.add('active');
+                
+                // 平滑滾動到調整面板
+                adjustmentPanel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        }
+
+        if (closeAdjustmentBtn && adjustmentPanel) {
+            closeAdjustmentBtn.addEventListener('click', () => {
+                adjustmentPanel.classList.add('hidden');
+                adjustmentToggleBtn.classList.remove('active');
             });
         }
 
@@ -841,9 +976,36 @@ document.addEventListener('DOMContentLoaded', function () {
                 // 重新計算並更新顯示
                 if (lastCalculationData) {
                     updateHealthIndicators(lastCalculationData);
-                    alert('指標調整已套用！所有健康評級已根據新標準更新。');
+                    
+                    // 收折調整面板
+                    const adjustmentPanel = document.getElementById('adjustmentPanel');
+                    const adjustmentToggleBtn = document.getElementById('adjustmentToggleBtn');
+                    const basicViewBtn = document.getElementById('basicViewBtn');
+                    const professionalViewBtn = document.getElementById('professionalViewBtn');
+                    const basicView = document.getElementById('basicInvestorView');
+                    const professionalView = document.getElementById('professionalInvestorView');
+                    
+                    if (adjustmentPanel && adjustmentToggleBtn) {
+                        adjustmentPanel.classList.add('hidden');
+                        adjustmentToggleBtn.classList.remove('active');
+                    }
+                    
+                    // 切換回基本投資人版
+                    if (basicViewBtn && professionalViewBtn && basicView && professionalView) {
+                        basicView.style.display = 'block';
+                        professionalView.style.display = 'none';
+                        basicViewBtn.classList.add('active');
+                        professionalViewBtn.classList.remove('active');
+                        
+                        // 平滑滾動到基本投資人版
+                        setTimeout(() => {
+                            basicView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        }, 300);
+                    }
+                    
+                    alert('✅ 指標調整已套用！\n\n所有健康評級已根據新標準更新，已自動切換回基本投資人版供您查看結果。');
                 } else {
-                    alert('請先進行財務計算，再套用指標調整。');
+                    alert('⚠️ 請先進行財務計算，再套用指標調整。');
                 }
             });
         }

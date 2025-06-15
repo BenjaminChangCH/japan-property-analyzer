@@ -49,24 +49,44 @@
             <div class="guest-mode" id="guestMode">
                 <span class="auth-icon">👤</span>
                 <span>訪客模式</span>
-                <button class="auth-btn login-btn" onclick="login()">
-                    <span class="google-icon">🔐</span>
-                    Google 登入
+                <button type="button" class="google-login-btn" id="googleLoginBtn">
+                    <div class="google-icon"></div>
+                    使用 Google 登入
                 </button>
             </div>
             <div class="user-mode hidden" id="userMode">
-                <img class="user-avatar" id="userAvatar" src="" alt="用戶頭像">
-                <span class="user-name" id="userName"></span>
                 <div class="user-menu">
-                    <button class="auth-btn" onclick="showUserMenu()">▼</button>
+                    <div class="user-info" onclick="showUserMenu()">
+                        <img class="user-avatar" id="userAvatar" src="" alt="用戶頭像">
+                        <div class="user-details">
+                            <div class="user-name" id="userName"></div>
+                            <div class="user-status">已登入</div>
+                        </div>
+                        <span style="margin-left: 8px; color: #5f6368;">▼</span>
+                    </div>
                     <div class="user-dropdown hidden" id="userDropdown">
-                        <a href="#" onclick="showProfile()">個人資料</a>
-                        <a href="#" onclick="showProperties()">我的案件</a>
-                        <a href="#" onclick="logout()">登出</a>
+                        <a href="#" onclick="showProfile()">
+                            <span class="dropdown-icon">👤</span>
+                            個人資料
+                        </a>
+                        <a href="#" onclick="showProperties()">
+                            <span class="dropdown-icon">🏠</span>
+                            我的案件
+                        </a>
+                        <a href="#" onclick="logout()">
+                            <span class="dropdown-icon">🚪</span>
+                            登出
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- 登入成功提示 -->
+    <div class="login-success-toast" id="loginSuccessToast">
+        <span class="toast-icon">✅</span>
+        <span>登入成功！歡迎回來</span>
     </div>
 
     <div class="report-container" id="reportToPrint">
@@ -615,14 +635,191 @@
                 <div class="section" id="financialAnalysis">
                     <h2>第二章：財務分析總覽</h2>
                     
-                    <!-- 投資健康度總覽 -->
-                    <div class="summary-card" id="healthOverview">
-                        <h3>🏥 投資健康度評估</h3>
-                        <div class="health-indicator">
-                            <div class="health-badge" id="healthBadge">
-                                <span id="healthRating">評估中...</span>
+                    <!-- 投資健康度評估 - 獨立區塊 -->
+                    <div class="health-assessment-section">
+                        <div class="summary-card" id="healthOverview">
+                            <h3>🏥 投資健康度評估</h3>
+                            <div class="health-indicator">
+                                <div class="health-badge" id="healthBadge">
+                                    <span id="healthRating">評估中...</span>
+                                </div>
+                                <p id="healthDescription">正在分析您的投資結構...</p>
                             </div>
-                            <p id="healthDescription">正在分析您的投資結構...</p>
+                        </div>
+                    </div>
+
+                    <!-- 分析版本選擇 -->
+                    <div class="analysis-mode-selector">
+                        <div class="mode-selector-header">
+                            <div class="mode-title-section">
+                                <h3>📊 選擇分析模式</h3>
+                                <p class="mode-description">請選擇適合您投資經驗的分析模式，系統將提供對應的指標和建議</p>
+                            </div>
+                            <!-- 指標調整角落按鈕 -->
+                            <button id="adjustmentToggleBtn" class="adjustment-toggle-btn" title="自訂健康標準">
+                                <span class="adjustment-icon">⚙️</span>
+                                <span class="adjustment-text">指標調整</span>
+                            </button>
+                        </div>
+                        <div class="mode-buttons">
+                            <button id="basicViewBtn" class="mode-btn active" data-mode="basic">
+                                <div class="mode-icon">📈</div>
+                                <div class="mode-content">
+                                    <h4>基本投資人版</h4>
+                                    <p>核心指標，簡潔易懂</p>
+                                </div>
+                            </button>
+                            <button id="professionalViewBtn" class="mode-btn" data-mode="professional">
+                                <div class="mode-icon">🎯</div>
+                                <div class="mode-content">
+                                    <h4>專業投資人版</h4>
+                                    <p>進階槓桿分析，深度評估</p>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <!-- 指標調整展開區域 -->
+                        <div id="adjustmentPanel" class="adjustment-panel hidden">
+                            <div class="adjustment-panel-header">
+                                <h4>⚙️ 指標調整設定</h4>
+                                <button id="closeAdjustmentBtn" class="close-adjustment-btn">✕</button>
+                            </div>
+                            <p class="adjustment-note">
+                                調整關鍵指標的健康標準，以符合您的投資策略和風險偏好。調整後將即時更新所有指標的健康評級。
+                            </p>
+                            
+                            <div class="adjustment-grid">
+                                <!-- DCR 調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        債務覆蓋率 (DCR) 標準
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">DCR = 年度淨營運收入 ÷ 年度債務服務總額<br><br>此比率衡量房產收入覆蓋債務支付的能力。比率越高，表示現金流越安全。<br><br>保守投資者建議設定較高標準（如 ≥1.30），積極投資者可接受較低標準（如 ≥1.15）。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>安全標準 (≥)</label>
+                                            <input type="number" id="dcrSafeThreshold" value="1.25" step="0.05" min="1.0" max="2.0">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>警告標準 (≥)</label>
+                                            <input type="number" id="dcrWarningThreshold" value="1.10" step="0.05" min="1.0" max="1.5">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CoCR 調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        現金回報率 (CoCR) 標準 (%)
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">CoCR = 年度淨現金流 ÷ 總投資金額 × 100%<br><br>此指標衡量您投入的現金每年能產生多少回報。是評估投資效率的核心指標。<br><br>一般而言，5% 以上被認為是優秀的現金回報率，3-5% 為良好水準。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>優秀標準 (≥)</label>
+                                            <input type="number" id="cocrExcellentThreshold" value="5" step="0.5" min="2" max="15">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>良好標準 (≥)</label>
+                                            <input type="number" id="cocrGoodThreshold" value="3" step="0.5" min="1" max="10">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- LTV 調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        貸款價值比 (LTV) 標準 (%)
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">LTV = 總貸款金額 ÷ 房產價值 × 100%<br><br>此指標反映槓桿程度和風險水平。LTV 越高，槓桿越大，潛在回報和風險都會增加。<br><br>保守投資者通常偏好 LTV ≤ 70%，而積極投資者可能接受 LTV 達 85% 或更高。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>保守標準 (≤)</label>
+                                            <input type="number" id="ltvConservativeThreshold" value="75" step="5" min="50" max="90">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>適中標準 (≤)</label>
+                                            <input type="number" id="ltvModerateThreshold" value="85" step="5" min="70" max="95">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- IRR 調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        內部報酬率 (IRR) 標準 (%)
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">IRR 是綜合考慮投資期間所有現金流後的年化報酬率，是評估長期投資獲利能力的黃金標準。<br><br>IRR 應該顯著高於無風險利率（如政府債券）和機會成本。在日本低利率環境下，8% 以上的 IRR 通常被認為是優秀的。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>優秀標準 (≥)</label>
+                                            <input type="number" id="irrExcellentThreshold" value="8" step="0.5" min="4" max="20">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>良好標準 (≥)</label>
+                                            <input type="number" id="irrGoodThreshold" value="5" step="0.5" min="2" max="15">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- DSCR 調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        債務償付覆蓋率 (DSCR) 標準
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">DSCR = EBITDA ÷ 年度債務服務總額<br><br>此指標衡量企業營運現金流覆蓋債務支付的能力，是銀行評估放貸風險的重要指標。<br><br>銀行通常要求 DSCR ≥ 1.25，但保守投資者可能偏好更高的標準以確保安全邊際。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>健康標準 (≥)</label>
+                                            <input type="number" id="dscrHealthyThreshold" value="1.30" step="0.05" min="1.0" max="2.0">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>警告標準 (≥)</label>
+                                            <input type="number" id="dscrWarningThreshold" value="1.15" step="0.05" min="1.0" max="1.5">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 槓桿倍數調整 -->
+                                <div class="adjustment-group">
+                                    <h4>
+                                        槓桿倍數標準
+                                        <div class="tooltip">
+                                            <span class="info-icon">i</span>
+                                            <span class="tooltiptext">槓桿倍數 = 總債務 ÷ 自有資本<br><br>此指標反映投資的槓桿程度。倍數越高，代表使用越多借貸資金，潛在回報和風險都會放大。<br><br>一般建議控制在 2-4 倍之間，但具體標準應根據個人風險承受能力和市場環境調整。</span>
+                                        </div>
+                                    </h4>
+                                    <div class="adjustment-controls">
+                                        <div class="control-group">
+                                            <label>保守標準 (≤)</label>
+                                            <input type="number" id="leverageConservativeThreshold" value="3.0" step="0.5" min="1.0" max="8.0">
+                                        </div>
+                                        <div class="control-group">
+                                            <label>適中標準 (≤)</label>
+                                            <input type="number" id="leverageModerateThreshold" value="5.0" step="0.5" min="2.0" max="10.0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="adjustment-actions">
+                                <button id="resetThresholdsBtn" class="btn btn-secondary">重設為預設值</button>
+                                <button id="applyThresholdsBtn" class="btn btn-primary">套用調整</button>
+                            </div>
                         </div>
                     </div>
 
@@ -768,12 +965,7 @@
                         </table>
                     </div>
 
-                    <!-- 切換按鈕 -->
-                    <div class="view-toggle">
-                        <button id="basicViewBtn" class="toggle-btn active">基本投資人版</button>
-                        <button id="professionalViewBtn" class="toggle-btn">專業投資人版</button>
-                        <button id="adjustmentViewBtn" class="toggle-btn">指標調整</button>
-                    </div>
+
 
                     <!-- 指標調整介面 -->
                     <div class="summary-card" id="adjustmentView" style="display: none;">

@@ -25,12 +25,7 @@ def init_oauth(app):
         name='google',
         client_id=os.getenv('GOOGLE_CLIENT_ID'),
         client_secret=os.getenv('GOOGLE_CLIENT_SECRET'),
-        authorize_url='https://accounts.google.com/o/oauth2/auth',
-        authorize_params=None,
-        access_token_url='https://oauth2.googleapis.com/token',
-        access_token_params=None,
-        refresh_token_url=None,
-        userinfo_endpoint='https://openidconnect.googleapis.com/v1/userinfo',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
         client_kwargs={
             'scope': 'openid email profile'
         }
@@ -60,29 +55,48 @@ def login():
 @auth_bp.route('/callback')
 def callback():
     """處理 Google OAuth 回調"""
+    from flask import current_app
+    
+    current_app.logger.info("OAuth 回調函數開始執行")
+    current_app.logger.info(f"接收到的參數: {dict(request.args)}")
+    
     if not google:
+        current_app.logger.error("Google OAuth 未正確配置")
         return jsonify({'error': '認證服務未正確配置'}), 500
     
     # 驗證 state 參數
-    if request.args.get('state') != session.get('oauth_state'):
+    received_state = request.args.get('state')
+    session_state = session.get('oauth_state')
+    current_app.logger.info(f"State 驗證 - 接收: {received_state}, 會話: {session_state}")
+    
+    if received_state != session_state:
+        current_app.logger.error("State 參數驗證失敗")
         flash('認證失敗：安全驗證錯誤', 'error')
         return redirect(url_for('index'))
     
     try:
+        current_app.logger.info("開始獲取 access token")
         # 獲取 access token
         token = google.authorize_access_token()
+        current_app.logger.info(f"Token 獲取成功: {bool(token)}")
         
         # 獲取用戶資訊
         user_info = token.get('userinfo')
+        current_app.logger.info(f"用戶資訊: {user_info}")
+        
         if not user_info:
+            current_app.logger.error("無法獲取用戶資訊")
             flash('認證失敗：無法獲取用戶資訊', 'error')
             return redirect(url_for('index'))
         
         # 檢查用戶是否已存在
-        user = User.query.filter_by(google_id=user_info['sub']).first()
+        google_id = user_info['sub']
+        user = User.query.filter_by(google_id=google_id).first()
+        current_app.logger.info(f"檢查現有用戶 (Google ID: {google_id}): {bool(user)}")
         
         if not user:
             # 創建新用戶
+            current_app.logger.info("創建新用戶")
             user = User(
                 id=str(uuid.uuid4()),
                 google_id=user_info['sub'],
@@ -92,25 +106,36 @@ def callback():
             )
             db.session.add(user)
             db.session.commit()
+            current_app.logger.info(f"新用戶創建成功: {user.email}")
             flash(f'歡迎加入！{user.name}', 'success')
         else:
             # 更新現有用戶資訊
+            current_app.logger.info("更新現有用戶資訊")
             user.name = user_info['name']
             user.avatar_url = user_info.get('picture', '')
             db.session.commit()
+            current_app.logger.info(f"用戶資訊更新成功: {user.email}")
             flash(f'歡迎回來！{user.name}', 'success')
         
         # 登入用戶
-        login_user(user, remember=True)
+        current_app.logger.info("執行用戶登入")
+        # Flask-Login 會自動處理認證狀態，不需要手動設置
+        login_result = login_user(user, remember=True, duration=None, force=False, fresh=True)
+        current_app.logger.info(f"登入結果: {login_result}")
+        current_app.logger.info(f"會話中的用戶: {session.get('_user_id', 'None')}")
         
         # 清除 OAuth state
         session.pop('oauth_state', None)
         
-        # 重定向到原本要訪問的頁面或首頁
+        # 重定向到原本要訪問的頁面或首頁，並添加登入成功參數
         next_page = request.args.get('next')
-        return redirect(next_page) if next_page else redirect(url_for('index'))
+        redirect_url = next_page if next_page else url_for('index', login='success')
+        current_app.logger.info(f"準備重定向到: {redirect_url}")
+        
+        return redirect(redirect_url)
         
     except Exception as e:
+        current_app.logger.error(f"OAuth 回調處理發生錯誤: {str(e)}", exc_info=True)
         flash(f'登入失敗：{str(e)}', 'error')
         return redirect(url_for('index'))
 
@@ -150,12 +175,20 @@ def update_profile():
 @auth_bp.route('/status')
 def status():
     """檢查用戶登入狀態"""
+    from flask import current_app, session
+    
+    current_app.logger.info(f"檢查認證狀態 - current_user: {current_user}")
+    current_app.logger.info(f"current_user.is_authenticated: {current_user.is_authenticated}")
+    current_app.logger.info(f"會話資料: {dict(session)}")
+    
     if current_user.is_authenticated:
+        current_app.logger.info(f"用戶已認證: {current_user.email}")
         return jsonify({
             'authenticated': True,
             'user': current_user.to_dict()
         })
     else:
+        current_app.logger.info("用戶未認證")
         return jsonify({
             'authenticated': False,
             'user': None
@@ -164,7 +197,16 @@ def status():
 # 用戶載入回調函數
 def load_user(user_id):
     """Flask-Login 用戶載入回調"""
-    return User.query.get(user_id)
+    from flask import current_app
+    current_app.logger.info(f"load_user 被調用，用戶ID: {user_id}")
+    
+    try:
+        user = User.query.get(user_id)
+        current_app.logger.info(f"load_user 結果: {user.email if user else None}")
+        return user
+    except Exception as e:
+        current_app.logger.error(f"load_user 錯誤: {str(e)}")
+        return None
 
 # 未授權訪問處理
 def unauthorized():
