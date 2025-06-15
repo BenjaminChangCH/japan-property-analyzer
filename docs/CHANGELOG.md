@@ -10,8 +10,10 @@
 ### 修復
 - **重大修復**: STG 環境 OAuth invalid_client 錯誤
 - **重大修復**: 本機開發環境 OAuth 重定向 URI 協議問題
+- **重大修復**: 識別 PRD Google 登入失敗根本原因 - OAuth 重定向 URI 配置不完整
 - 修復 cloudbuild-staging.yaml 使用假憑證的問題
 - 修復本機開發環境 HTTPS/HTTP 協議衝突
+- 完整分析 STG 和 PRD 環境配置差異，提供詳細修復指南
 - 增強 OAuth 錯誤處理和授權碼驗證
 
 ### 新增
