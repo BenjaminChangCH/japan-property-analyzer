@@ -7,6 +7,8 @@
 
 ## [未發布]
 
+## [v1.3.0] - 2025-06-16
+
 ### 新增
 - 完整的文字層級系統設計規範
 - 統一的 CSS 變數系統（字體、間距、圓角、陰影）
@@ -17,28 +19,37 @@
 - 功能初始化系統 (`/init` 指令)
 - 統一指令管理系統 (`scripts/cursor_commands.py`)
 - 完整的開發流程自動化
+- 統一快捷指令參考文檔 (`QUICK_REFERENCE.md`)
+- 文檔歸檔系統 (`docs/guides/`, `docs/reports/`, `docs/archive/`)
 
 ### 變更
 - **重大更新**: 完全重構 CSS 文字層級系統
 - **建立設計系統規範**: 創建完整的設計系統文檔作為開發標準
 - **強制性設計規範**: 更新 .cursorrules 強制要求遵循設計系統
+- **文檔結構重整**: 重新整理專案文件結構，刪除重複文檔
 - 統一所有標題、內文、標籤的字體大小和字重
 - 優化表格和數據顯示的可讀性
 - 改善按鈕、表單和卡片的視覺設計
 - 增強工具提示和說明文字的專業度
 - 新增設計系統相關的 Slash Commands
-- 更新 README.md 添加開發完成檢查系統說明
-- 更新 .cursorrules 添加新指令規範
-- 更新 CURSOR_QUICK_REFERENCE.md 添加完整指令說明
+- 整合 CURSOR_QUICK_REFERENCE.md 和 USAGE_GUIDE.md 為統一參考文檔
+- 更新檢查腳本以適應新的文檔結構
 
 ### 新增文件
-- `docs/DESIGN_SYSTEM.md` - **完整設計系統規範文檔**
-- `docs/TYPOGRAPHY_SYSTEM.md` - 文字層級系統設計規範
+- `QUICK_REFERENCE.md` - **統一快捷指令參考文檔**
+- `docs/README.md` - 文檔目錄索引
+- `docs/guides/DESIGN_SYSTEM.md` - **完整設計系統規範文檔**
+- `docs/guides/TYPOGRAPHY_SYSTEM.md` - 文字層級系統設計規範
+- `docs/guides/DESIGN_SYSTEM_QUICK_REF.md` - 設計系統快速參考
 - `scripts/dev_complete_check.py` - 開發完成檢查核心腳本
 - `scripts/feature_init.py` - 功能初始化核心腳本
 - `scripts/cursor_commands.py` - 統一指令管理腳本
-- `USAGE_GUIDE.md` - 開發完成檢查系統使用指南
-- `docs/CHANGELOG.md` - 版本變更記錄（本文件）
+
+### 移除文件
+- `CURSOR_QUICK_REFERENCE.md` - 已整合到 QUICK_REFERENCE.md
+- `USAGE_GUIDE.md` - 已整合到 QUICK_REFERENCE.md
+- 過時的完成報告文檔
+- 重複的 OAuth 初始化報告
 
 ### 技術改進
 - 建立了 6 個標題層級 (H1-H4) 和 4 個內文層級
@@ -46,6 +57,7 @@
 - 統一了圓角和陰影系統
 - 優化了字體堆疊和顏色應用
 - 改善了響應式設計的文字適配
+- 完善了文檔歸檔和索引系統
 
 ## [v1.1.0] - 2025-06-15
 
@@ -110,4 +122,4 @@
 ---
 
 **維護者**: Benjamin Chang  
-**最後更新**: 2025-06-15 
+**最後更新**: 2025-06-16 

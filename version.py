@@ -10,17 +10,17 @@ Japan Property Analyzer 版本資訊
 # MINOR: 新增功能，向後相容
 # PATCH: 錯誤修復，向後相容
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __version_info__ = tuple(map(int, __version__.split('.')))
 
 # 應用程式資訊
 APP_NAME = "Japan Property Analyzer"
 APP_DESCRIPTION = "日本不動產投資與商業模式財務分析"
 APP_AUTHOR = "Benjamin Chang"
-APP_URL = "https://github.com/your-username/japan-property-analyzer"
+APP_URL = "https://github.com/BenjaminChangCH/japan-property-analyzer"
 
 # 發佈資訊
-RELEASE_DATE = "2025-06-12"
+RELEASE_DATE = "2025-06-16"
 BUILD_NUMBER = None  # 將由 CI/CD 系統自動設定
 
 def get_version():
