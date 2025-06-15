@@ -52,7 +52,7 @@ steps:
         --region asia-northeast1 \
         --platform managed \
         --allow-unauthenticated \
-        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=false,SECRET_KEY=prd-secret-key-2024-japan-property-analyzer,GOOGLE_CLIENT_ID=864942598341-your-client-id.googleusercontent.com,GOOGLE_CLIENT_SECRET=your-client-secret-here \
+        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=false,SECRET_KEY=ecd48ef5097e192fd1a9c27bd04e3fe66910f9feac345df64753747064087c6f,GOOGLE_CLIENT_ID=$$(gcloud secrets versions access latest --secret=google-oauth-client-id),GOOGLE_CLIENT_SECRET=$$(gcloud secrets versions access latest --secret=google-oauth-client-secret) \
         --memory 1Gi \
         --cpu 1 \
         --max-instances 20 \
