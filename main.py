@@ -19,12 +19,20 @@ from config.health_check import setup_health_endpoints, setup_request_tracking
 
 # 確保當前目錄在 Python 路徑中
 import sys
-if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+current_dir = os.path.dirname(os.path.abspath(__file__))
+if current_dir not in sys.path:
+    sys.path.insert(0, current_dir)
 
 # 導入認證相關模組
-from models import db, User
-from auth import auth_bp, init_oauth, load_user, unauthorized
+try:
+    from models import db, User
+    from auth import auth_bp, init_oauth, load_user, unauthorized
+except ImportError as e:
+    print(f"Import error: {e}")
+    print(f"Current directory: {current_dir}")
+    print(f"Python path: {sys.path}")
+    print(f"Files in current directory: {os.listdir(current_dir)}")
+    raise
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
