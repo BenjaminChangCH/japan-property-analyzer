@@ -47,8 +47,8 @@ def login():
     state = secrets.token_urlsafe(32)
     session['oauth_state'] = state
     
-    # 設定回調 URL
-    redirect_uri = url_for('auth.callback', _external=True)
+    # 設定回調 URL - 強制使用 HTTPS
+    redirect_uri = url_for('auth.callback', _external=True, _scheme='https')
     
     return google.authorize_redirect(redirect_uri, state=state)
 
