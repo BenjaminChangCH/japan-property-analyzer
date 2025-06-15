@@ -6,6 +6,130 @@
     --light-gray: #f8f9fa;
     --border-color: #dee2e6;
 }
+
+/* 用戶認證樣式 */
+.auth-container {
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
+    padding: 0 20px;
+}
+
+.auth-status {
+    background: white;
+    border-radius: 10px;
+    padding: 15px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.guest-mode, .user-mode {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.auth-icon {
+    font-size: 18px;
+}
+
+.auth-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.auth-btn:hover {
+    background: #0d3c5a;
+}
+
+.login-btn {
+    background: #4285f4;
+}
+
+.login-btn:hover {
+    background: #357ae8;
+}
+
+.google-icon {
+    font-size: 16px;
+}
+
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.user-menu {
+    position: relative;
+}
+
+.user-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    min-width: 150px;
+    z-index: 1000;
+    margin-top: 5px;
+}
+
+.user-dropdown a {
+    display: block;
+    padding: 10px 15px;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.user-dropdown a:hover {
+    background: var(--light-gray);
+}
+
+.user-dropdown a:first-child {
+    border-radius: 6px 6px 0 0;
+}
+
+.user-dropdown a:last-child {
+    border-radius: 0 0 6px 6px;
+}
+
+@media (max-width: 768px) {
+    .auth-container {
+        padding: 0 10px;
+    }
+    
+    .auth-status {
+        padding: 10px 15px;
+    }
+    
+    .user-name {
+        display: none;
+    }
+    
+    .user-dropdown {
+        right: -10px;
+    }
+}
 body {
     font-family: 'Noto Sans TC', "Microsoft JhengHei", Arial, sans-serif;
     line-height: 1.8;

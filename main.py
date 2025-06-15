@@ -1,8 +1,13 @@
 from flask import Flask, request, jsonify, render_template, send_from_directory
 from flask_cors import CORS
+from flask_login import LoginManager, login_required, current_user
 import math
 import os
 from version import get_version_info
+from dotenv import load_dotenv
+
+# 載入環境變數
+load_dotenv()
 
 # 導入新的配置模組
 from config.security_config import (
@@ -12,7 +17,40 @@ from config.security_config import (
 from config.logging_config import setup_logging, setup_error_handlers
 from config.health_check import setup_health_endpoints, setup_request_tracking
 
+# 導入認證相關模組
+from models import db, User
+from auth import auth_bp, init_oauth, load_user, unauthorized
+
 app = Flask(__name__, template_folder='templates', static_folder='static')
+
+# 設定 Flask 密鑰
+app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+
+# 設定資料庫
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# 初始化資料庫
+db.init_app(app)
+
+# 設定 Flask-Login
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+login_manager.login_message = '請先登入才能使用此功能'
+login_manager.login_message_category = 'warning'
+login_manager.user_loader(load_user)
+login_manager.unauthorized_handler(unauthorized)
+
+# 初始化 OAuth
+oauth, google = init_oauth(app)
+
+# 註冊認證藍圖
+app.register_blueprint(auth_bp)
+
+# 創建資料庫表格
+with app.app_context():
+    db.create_all()
 
 # 設定安全性和監控
 setup_cors_security(app)  # 取代原本的 CORS(app)

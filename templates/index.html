@@ -43,6 +43,32 @@
         <p id="loading-message">分析報告生成中，請稍候...</p>
     </div>
 
+    <!-- 用戶認證區域 -->
+    <div class="auth-container">
+        <div class="auth-status" id="authStatus">
+            <div class="guest-mode" id="guestMode">
+                <span class="auth-icon">👤</span>
+                <span>訪客模式</span>
+                <button class="auth-btn login-btn" onclick="login()">
+                    <span class="google-icon">🔐</span>
+                    Google 登入
+                </button>
+            </div>
+            <div class="user-mode hidden" id="userMode">
+                <img class="user-avatar" id="userAvatar" src="" alt="用戶頭像">
+                <span class="user-name" id="userName"></span>
+                <div class="user-menu">
+                    <button class="auth-btn" onclick="showUserMenu()">▼</button>
+                    <div class="user-dropdown hidden" id="userDropdown">
+                        <a href="#" onclick="showProfile()">個人資料</a>
+                        <a href="#" onclick="showProperties()">我的案件</a>
+                        <a href="#" onclick="logout()">登出</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="report-container" id="reportToPrint">
         <div class="report-header">
             <h1>日本不動產投資與商業模式財務分析</h1>

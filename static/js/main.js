@@ -1,4 +1,80 @@
+// 用戶認證相關函數
+let currentUser = null;
+
+// 檢查用戶登入狀態
+async function checkAuthStatus() {
+    try {
+        const response = await fetch('/auth/status');
+        const data = await response.json();
+        
+        if (data.authenticated) {
+            currentUser = data.user;
+            showUserMode(data.user);
+        } else {
+            currentUser = null;
+            showGuestMode();
+        }
+    } catch (error) {
+        console.error('檢查認證狀態失敗:', error);
+        showGuestMode();
+    }
+}
+
+// 顯示用戶模式
+function showUserMode(user) {
+    document.getElementById('guestMode').classList.add('hidden');
+    document.getElementById('userMode').classList.remove('hidden');
+    document.getElementById('userName').textContent = user.name;
+    document.getElementById('userAvatar').src = user.avatar_url || '/static/images/default-avatar.png';
+}
+
+// 顯示訪客模式
+function showGuestMode() {
+    document.getElementById('guestMode').classList.remove('hidden');
+    document.getElementById('userMode').classList.add('hidden');
+}
+
+// Google 登入
+function login() {
+    window.location.href = '/auth/login';
+}
+
+// 登出
+function logout() {
+    if (confirm('確定要登出嗎？')) {
+        window.location.href = '/auth/logout';
+    }
+}
+
+// 顯示用戶選單
+function showUserMenu() {
+    const dropdown = document.getElementById('userDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+// 顯示個人資料
+function showProfile() {
+    alert('個人資料功能開發中...');
+}
+
+// 顯示我的案件
+function showProperties() {
+    alert('案件管理功能開發中...');
+}
+
+// 點擊其他地方時隱藏下拉選單
+document.addEventListener('click', function(event) {
+    const userMenu = document.querySelector('.user-menu');
+    const dropdown = document.getElementById('userDropdown');
+    
+    if (userMenu && !userMenu.contains(event.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
+
 document.addEventListener('DOMContentLoaded', function () {
+    // 初始化認證狀態
+    checkAuthStatus();
     const expertValues = {
         propertyTypes: {
             '1LDK': {
