@@ -17,6 +17,12 @@ from config.security_config import (
 from config.logging_config import setup_logging, setup_error_handlers
 from config.health_check import setup_health_endpoints, setup_request_tracking
 
+# 確保當前目錄在 Python 路徑中
+import sys
+import os
+if os.path.dirname(os.path.abspath(__file__)) not in sys.path:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # 導入認證相關模組
 from models import db, User
 from auth import auth_bp, init_oauth, load_user, unauthorized
