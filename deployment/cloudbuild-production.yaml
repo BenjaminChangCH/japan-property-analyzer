@@ -47,12 +47,27 @@ steps:
     - '-c'
     - |
       source /workspace/build_vars.env
+      
+      # 獲取 OAuth 憑證
+      GOOGLE_CLIENT_ID=$(gcloud secrets versions access latest --secret=google-oauth-client-id)
+      GOOGLE_CLIENT_SECRET=$(gcloud secrets versions access latest --secret=google-oauth-client-secret)
+      
+      # 驗證憑證是否正確獲取
+      echo "Client ID length: $${#GOOGLE_CLIENT_ID}"
+      echo "Client Secret length: $${#GOOGLE_CLIENT_SECRET}"
+      
+      # 確保憑證不為空
+      if [ -z "$$GOOGLE_CLIENT_ID" ] || [ -z "$$GOOGLE_CLIENT_SECRET" ]; then
+        echo "Error: OAuth credentials are empty"
+        exit 1
+      fi
+      
       gcloud run deploy japan-property-analyzer-prod \
         --image gcr.io/$PROJECT_ID/japan-property-analyzer-prod:$$IMAGE_TAG \
         --region asia-northeast1 \
         --platform managed \
         --allow-unauthenticated \
-        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=false,SECRET_KEY=prd-secret-key-2024-japan-property-analyzer,GOOGLE_CLIENT_ID=864942598341-your-client-id.googleusercontent.com,GOOGLE_CLIENT_SECRET=your-client-secret-here \
+        --set-env-vars "GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=false,SECRET_KEY=ecd48ef5097e192fd1a9c27bd04e3fe66910f9feac345df64753747064087c6f,GOOGLE_CLIENT_ID=$$GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET=$$GOOGLE_CLIENT_SECRET" \
         --memory 1Gi \
         --cpu 1 \
         --max-instances 20 \
