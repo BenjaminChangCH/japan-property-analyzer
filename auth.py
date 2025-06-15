@@ -47,8 +47,15 @@ def login():
     state = secrets.token_urlsafe(32)
     session['oauth_state'] = state
     
-    # 設定回調 URL - 強制使用 HTTPS
-    redirect_uri = url_for('auth.callback', _external=True, _scheme='https')
+    # 設定回調 URL - 根據環境決定協議
+    import os
+    environment = os.getenv('ENVIRONMENT', 'development')
+    if environment == 'development':
+        # 開發環境使用 HTTP
+        redirect_uri = url_for('auth.callback', _external=True, _scheme='http')
+    else:
+        # 生產環境使用 HTTPS
+        redirect_uri = url_for('auth.callback', _external=True, _scheme='https')
     
     return google.authorize_redirect(redirect_uri, state=state)
 
@@ -63,6 +70,21 @@ def callback():
     if not google:
         current_app.logger.error("Google OAuth 未正確配置")
         return jsonify({'error': '認證服務未正確配置'}), 500
+    
+    # 檢查是否有錯誤參數
+    error = request.args.get('error')
+    if error:
+        current_app.logger.error(f"OAuth 錯誤: {error}")
+        error_description = request.args.get('error_description', '')
+        flash(f'登入失敗：{error_description or error}', 'error')
+        return redirect(url_for('index'))
+    
+    # 檢查是否有授權碼
+    code = request.args.get('code')
+    if not code:
+        current_app.logger.error("缺少授權碼")
+        flash('登入失敗：缺少授權碼', 'error')
+        return redirect(url_for('index'))
     
     # 驗證 state 參數
     received_state = request.args.get('state')

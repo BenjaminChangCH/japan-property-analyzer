@@ -48,8 +48,8 @@ steps:
       source /workspace/build_vars.env
       
       # 獲取 OAuth 憑證
-      GOOGLE_CLIENT_ID=$(gcloud secrets versions access latest --secret=google-oauth-client-id)
-      GOOGLE_CLIENT_SECRET=$(gcloud secrets versions access latest --secret=google-oauth-client-secret)
+      GOOGLE_CLIENT_ID=$$(gcloud secrets versions access latest --secret=google-oauth-client-id)
+      GOOGLE_CLIENT_SECRET=$$(gcloud secrets versions access latest --secret=google-oauth-client-secret)
       
       # 驗證憑證是否正確獲取
       echo "Client ID length: $${#GOOGLE_CLIENT_ID}"

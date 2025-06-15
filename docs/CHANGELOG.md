@@ -7,15 +7,36 @@
 
 ## [未發布]
 
+### 修復
+- **重大修復**: STG 環境 OAuth invalid_client 錯誤
+- **重大修復**: 本機開發環境 OAuth 重定向 URI 協議問題
+- 修復 cloudbuild-staging.yaml 使用假憑證的問題
+- 修復本機開發環境 HTTPS/HTTP 協議衝突
+- 增強 OAuth 錯誤處理和授權碼驗證
+
 ### 新增
 - STG 環境 SEO 控制：添加 noindex 防止搜尋引擎索引
 - 動態 robots.txt 支援：根據環境變數自動生成
 - GitHub Actions STG 部署工作流程
+- Google Cloud Secret Manager 整合
+- 環境感知的 OAuth 重定向 URI 配置
+- 完整的 OAuth 錯誤處理機制
+- STG 環境修復自動化腳本 (`scripts/fix_stg_oauth.sh`)
 
 ### 變更
 - STG 環境 Cloud Run 配置：取消連線限制，開放公開存取
 - 增強 HTML meta tags：支援 robots noindex 控制
 - 優化部署配置：統一 ingress 和 execution environment 設定
+- **安全性提升**: 移除所有硬編碼 OAuth 憑證
+- **CI/CD 改進**: STG 環境使用 Secret Manager 管理敏感資訊
+- 本機開發環境支援 HTTP 協議 (localhost:5001)
+- 生產環境強制使用 HTTPS 協議
+
+### 技術改進
+- Cloud Build 服務帳戶 Secret Manager 權限配置
+- Docker 基礎映像更新至 python:3.11-slim-bookworm
+- 新增 .dockerignore 檔案優化建置效能
+- 統一 STG 和 PRD 環境憑證管理策略
 
 ## [v1.3.0] - 2025-06-16
 
