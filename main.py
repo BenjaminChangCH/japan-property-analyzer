@@ -37,13 +37,25 @@ except ImportError as e:
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
 # 設定 Flask 密鑰
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+secret_key = os.getenv('SECRET_KEY')
+print(f"DEBUG: SECRET_KEY from env: {secret_key[:10] if secret_key else 'None'}...")
+if not secret_key:
+    print("ERROR: SECRET_KEY 環境變數未設定！")
+    raise RuntimeError("SECRET_KEY 環境變數未設定")
+app.config['SECRET_KEY'] = secret_key
+print(f"DEBUG: SECRET_KEY 已設定，長度: {len(secret_key)}")
 
-# 會話配置
-app.config['SESSION_COOKIE_SECURE'] = False  # 開發環境設為 False，生產環境應為 True
+# 會話配置 - 根據環境動態設定
+environment = os.getenv('ENVIRONMENT', 'development')
+is_production = environment == 'production'
+print(f"DEBUG: Environment: {environment}, is_production: {is_production}")
+
+app.config['SESSION_COOKIE_SECURE'] = is_production  # 生產環境使用 HTTPS
 app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 86400  # 24小時
+
+print(f"DEBUG: SESSION_COOKIE_SECURE: {app.config['SESSION_COOKIE_SECURE']}")
 
 # 設定資料庫
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
