@@ -19,6 +19,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the main application files
 COPY main.py .
 COPY version.py .
+COPY models.py .
+COPY auth.py .
+COPY __init__.py .
 COPY env.example .
 
 # Copy directories

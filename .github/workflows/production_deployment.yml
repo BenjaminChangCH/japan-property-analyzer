@@ -20,8 +20,8 @@ jobs:
     - name: 'Authenticate to Google Cloud'
       uses: 'google-github-actions/auth@v1'
       with:
-        workload_identity_provider: 'projects/YOUR_GCP_PROJECT_ID/locations/global/workloadIdentityPools/YOUR_POOL_ID/providers/YOUR_PROVIDER_ID'
-        service_account: 'your-service-account@your-project-id.iam.gserviceaccount.com'
+        workload_identity_provider: 'projects/864942598341/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+        service_account: 'github-actions-sa@japan-property-analyzer.iam.gserviceaccount.com'
 
     - name: 'Set up Cloud SDK'
       uses: 'google-github-actions/setup-gcloud@v1'
@@ -29,3 +29,9 @@ jobs:
     - name: 'Submit to Cloud Build for Production'
       run: |
         gcloud builds submit --config deployment/cloudbuild-production.yaml . 
+        
+    - name: 'Notify PRD Deployment Complete'
+      run: |
+        echo "🎉 PRD 環境部署完成！"
+        echo "🌐 生產網址: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app"
+        echo "✅ 生產環境已更新並正常運行" 

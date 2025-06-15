@@ -347,24 +347,45 @@ AI：我來幫您開發案件收藏功能...
    - 準備 PR 到 main branch
 
 ### CI/CD 部署流程規範
-**重要**：本專案採用 STG → PRD 兩階段部署流程
-1. **STG 部署** (`/deploy-stg`)：
-   - 推送到 feature branch 或 develop branch
+**重要**：本專案採用 STG → PRD 兩階段部署流程，包含手動審核機制
+
+#### 完整流程 (詳見 `docs/CI_CD_WORKFLOW.md`)
+1. **STG 部署** (自動)：
+   - 推送到 feature/develop/hotfix branch
    - 自動觸發 STG 環境部署
-   - 用於功能測試和審查
    - STG 網址：https://japan-property-analyzer-864942598341.asia-northeast1.run.app
 
-2. **PRD 部署** (`/deploy-prd`)：
-   - 只能通過合併到 main branch 觸發
-   - 需要先通過 STG 環境測試和審查
-   - 自動觸發生產環境部署
+2. **STG 測試** (手動)：
+   - 開發者在 STG 環境進行功能測試
+   - 確認所有功能正常運作
+   - 測試 Google OAuth 登入功能
+   - 驗證響應式設計和效能
+
+3. **創建 Pull Request** (手動)：
+   - 測試通過後，手動創建 PR 到 main 分支
+   - 使用標準 PR 模板描述變更
+   - 包含 STG 測試結果和截圖
+
+4. **代碼審查** (手動)：
+   - 至少一位審查者進行代碼審查
+   - 審查者需在 STG 環境驗證功能
+   - 確認符合程式碼品質標準
+
+5. **PRD 部署** (自動)：
+   - PR 合併到 main 分支後自動觸發
+   - 部署到 PRD 環境
    - PRD 網址：https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app
 
-3. **部署安全規則**：
-   - 🚫 **禁止直接部署到 PRD**：不可跳過 STG 審查流程
-   - ✅ **必須先 STG 測試**：所有變更都要先在 STG 環境驗證
-   - ✅ **代碼審查必要**：PRD 部署前需要 code review
-   - ✅ **自動化 CI/CD**：使用 GitHub Actions + Google Cloud Build
+#### 安全規則
+- 🚫 **禁止直接推送到 main 分支**：main 分支受保護
+- ✅ **強制 STG 測試**：不可跳過 STG 環境測試
+- 👥 **必要代碼審查**：所有 PR 需要審查者批准
+- 🧪 **自動化檢查**：CI/CD 流程和測試必須通過
+
+#### 緊急修復流程
+- 使用 `hotfix/**` 分支進行緊急修復
+- 快速 STG 測試後創建緊急 PR
+- 必要時可進行生產環境回滾
 
 ---
 記住：程式開發是一個持續學習的過程，不要害怕犯錯，每個錯誤都是學習的機會！

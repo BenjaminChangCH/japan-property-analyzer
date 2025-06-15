@@ -1,0 +1,45 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'develop'
+      - 'hotfix/**'
+  # 移除 pull_request 觸發，避免自動創建不必要的 PR
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/864942598341/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+        service_account: 'github-actions-sa@japan-property-analyzer.iam.gserviceaccount.com'
+
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    - name: 'Submit to Cloud Build for Staging'
+      run: |
+        gcloud builds submit --config deployment/cloudbuild-staging.yaml . 
+        
+    - name: 'Notify STG Deployment Complete'
+      run: |
+        echo "🚀 STG 環境部署完成！"
+        echo "📍 測試網址: https://japan-property-analyzer-864942598341.asia-northeast1.run.app"
+        echo "⚠️ 注意：此為測試環境，已設定 noindex 防止搜尋引擎索引"
+        echo ""
+        echo "📋 下一步："
+        echo "1. 請前往 STG 環境進行功能測試"
+        echo "2. 測試完成後，請手動創建 Pull Request 到 main 分支"
+        echo "3. PR 合併後將自動部署到 PRD 環境" 
