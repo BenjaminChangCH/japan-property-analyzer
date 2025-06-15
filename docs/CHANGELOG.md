@@ -10,8 +10,10 @@
 ### 修復
 - **重大修復**: STG 環境 OAuth invalid_client 錯誤
 - **重大修復**: 本機開發環境 OAuth 重定向 URI 協議問題
+- **重大修復**: PRD 環境版本過舊導致持續錯誤問題
 - 修復 cloudbuild-staging.yaml 使用假憑證的問題
 - 修復本機開發環境 HTTPS/HTTP 協議衝突
+- 手動部署最新版本到 PRD 環境解決版本不一致問題
 - 增強 OAuth 錯誤處理和授權碼驗證
 
 ### 新增
