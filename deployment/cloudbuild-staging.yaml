@@ -40,7 +40,7 @@ steps:
       docker push gcr.io/$PROJECT_ID/japan-property-analyzer:$$IMAGE_TAG
 
   # 部署到 Cloud Run (STG 環境)
-  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  - name: 'gcr.io/cloud-builders/gcloud'
     entrypoint: 'bash'
     args:
     - '-c'
@@ -51,7 +51,7 @@ steps:
         --region asia-northeast1 \
         --platform managed \
         --allow-unauthenticated \
-        --set-env-vars GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=staging,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=true \
+        --set-env-vars GA_TRACKING_ID=G-59XMZ0SZ0G,ENVIRONMENT=staging,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=true,SECRET_KEY=stg-secret-key-2024-japan-property-analyzer,GOOGLE_CLIENT_ID=864942598341-your-client-id.googleusercontent.com,GOOGLE_CLIENT_SECRET=your-client-secret-here \
         --memory 1Gi \
         --cpu 1 \
         --max-instances 10 \

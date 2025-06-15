@@ -6,9 +6,7 @@ on:
       - 'feature/**'
       - 'develop'
       - 'hotfix/**'
-  pull_request:
-    branches:
-      - main
+  # 移除 pull_request 觸發，避免自動創建不必要的 PR
 
 jobs:
   deploy-staging:
@@ -35,14 +33,13 @@ jobs:
       run: |
         gcloud builds submit --config deployment/cloudbuild-staging.yaml . 
         
-    - name: 'Comment PR with Staging URL'
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: '🚀 STG 環境已部署完成！\n\n📍 測試網址: https://japan-property-analyzer-864942598341.asia-northeast1.run.app\n\n⚠️ 注意：此為測試環境，已設定 noindex 防止搜尋引擎索引'
-          }) 
+    - name: 'Notify STG Deployment Complete'
+      run: |
+        echo "🚀 STG 環境部署完成！"
+        echo "📍 測試網址: https://japan-property-analyzer-864942598341.asia-northeast1.run.app"
+        echo "⚠️ 注意：此為測試環境，已設定 noindex 防止搜尋引擎索引"
+        echo ""
+        echo "📋 下一步："
+        echo "1. 請前往 STG 環境進行功能測試"
+        echo "2. 測試完成後，請手動創建 Pull Request 到 main 分支"
+        echo "3. PR 合併後將自動部署到 PRD 環境" 
