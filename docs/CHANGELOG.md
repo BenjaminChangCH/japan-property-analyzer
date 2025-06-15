@@ -7,6 +7,16 @@
 
 ## [未發布]
 
+### 新增
+- STG 環境 SEO 控制：添加 noindex 防止搜尋引擎索引
+- 動態 robots.txt 支援：根據環境變數自動生成
+- GitHub Actions STG 部署工作流程
+
+### 變更
+- STG 環境 Cloud Run 配置：取消連線限制，開放公開存取
+- 增強 HTML meta tags：支援 robots noindex 控制
+- 優化部署配置：統一 ingress 和 execution environment 設定
+
 ## [v1.3.0] - 2025-06-16
 
 ### 新增

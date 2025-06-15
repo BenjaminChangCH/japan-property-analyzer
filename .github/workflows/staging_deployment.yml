@@ -1,0 +1,48 @@
+name: Staging Deployment
+
+on:
+  push:
+    branches:
+      - 'feature/**'
+      - 'develop'
+      - 'hotfix/**'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
+      with:
+        workload_identity_provider: 'projects/864942598341/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+        service_account: 'github-actions-sa@japan-property-analyzer.iam.gserviceaccount.com'
+
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
+    - name: 'Submit to Cloud Build for Staging'
+      run: |
+        gcloud builds submit --config deployment/cloudbuild-staging.yaml . 
+        
+    - name: 'Comment PR with Staging URL'
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: '🚀 STG 環境已部署完成！\n\n📍 測試網址: https://japan-property-analyzer-864942598341.asia-northeast1.run.app\n\n⚠️ 注意：此為測試環境，已設定 noindex 防止搜尋引擎索引'
+          }) 

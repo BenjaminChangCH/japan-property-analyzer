@@ -93,16 +93,18 @@ VERSION = get_version()
 # --- GA Tracking ---
 GA_TRACKING_ID = os.environ.get('GA_TRACKING_ID', 'G-59XMZ0SZ0G') # Default to test ID
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development')
+NO_INDEX = os.environ.get('NO_INDEX', 'false').lower() == 'true'
 
 @app.route('/')
 @rate_limit(max_requests=30)  # 首頁限制較寬鬆
 def index():
-    app.logger.info(f"首頁訪問 - 環境: {ENVIRONMENT}")
+    app.logger.info(f"首頁訪問 - 環境: {ENVIRONMENT}, NO_INDEX: {NO_INDEX}")
     
     return render_template('index.html', 
                          version=VERSION,
                          ga_tracking_id=GA_TRACKING_ID,
-                         environment=ENVIRONMENT)
+                         environment=ENVIRONMENT,
+                         no_index=NO_INDEX)
 
 @app.route('/version')
 def version():
@@ -117,6 +119,29 @@ def send_static(path):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'),
                                'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route('/robots.txt')
+def robots_txt():
+    """根據環境變數決定 robots.txt 內容"""
+    if NO_INDEX:
+        # STG 環境：禁止所有搜尋引擎索引
+        content = """User-agent: *
+Disallow: /
+
+# 禁止所有搜尋引擎索引此網站
+# This is a staging environment
+"""
+    else:
+        # PRD 環境：允許搜尋引擎索引
+        content = """User-agent: *
+Allow: /
+
+# 允許搜尋引擎索引
+Sitemap: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app/sitemap.xml
+"""
+    
+    from flask import Response
+    return Response(content, mimetype='text/plain')
 
 @app.route('/test_debug.html')
 def test_debug():

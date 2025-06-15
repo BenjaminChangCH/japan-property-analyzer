@@ -52,11 +52,13 @@ steps:
         --region asia-northeast1 \
         --platform managed \
         --allow-unauthenticated \
-        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM \
+        --set-env-vars GA_TRACKING_ID=G-94SVDFL5YN,ENVIRONMENT=production,APP_VERSION=$$VERSION,BUILD_NUMBER=$$BUILD_NUM,NO_INDEX=false \
         --memory 1Gi \
         --cpu 1 \
         --max-instances 20 \
-        --timeout 300
+        --timeout 300 \
+        --ingress all \
+        --execution-environment gen2
 
 # 設定觸發條件：當推送到 main 分支時觸發
 options:

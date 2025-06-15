@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>日本不動產投資與商業模式財務分析</title>
     
+    <!-- SEO 控制 -->
+    {% if no_index %}
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+    <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet">
+    {% endif %}
+    
     <!-- Google Analytics 4 -->
     {% if ga_tracking_id %}
     <!-- Google tag (gtag.js) -->
