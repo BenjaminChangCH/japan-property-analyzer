@@ -33,5 +33,5 @@ jobs:
     - name: 'Notify PRD Deployment Complete'
       run: |
         echo "🎉 PRD 環境部署完成！"
-        echo "🌐 生產網址: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app"
+        echo "🌐 生產網址: https://japan-property-analyzer-prod-2dal3iq3qa-an.a.run.app"
         echo "✅ 生產環境已更新並正常運行" 

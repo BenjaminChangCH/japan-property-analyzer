@@ -36,7 +36,7 @@ jobs:
     - name: 'Notify STG Deployment Complete'
       run: |
         echo "🚀 STG 環境部署完成！"
-        echo "📍 測試網址: https://japan-property-analyzer-864942598341.asia-northeast1.run.app"
+        echo "📍 測試網址: https://japan-property-analyzer-2dal3iq3qa-an.a.run.app"
         echo "⚠️ 注意：此為測試環境，已設定 noindex 防止搜尋引擎索引"
         echo ""
         echo "📋 下一步："
