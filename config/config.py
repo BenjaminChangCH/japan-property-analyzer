@@ -19,13 +19,13 @@ ENVIRONMENTS = {
         'ga_tracking_id': 'G-59XMZ0SZ0G',
         'environment_name': 'staging', 
         'debug_mode': True,
-        'url': 'https://japan-property-analyzer-864942598341.asia-northeast1.run.app'
+        'url': 'https://japan-property-analyzer-stg-2dal3iq3qa-an.a.run.app'
     },
     'production': {
         'ga_tracking_id': 'G-94SVDFL5YN',  # PRD 環境獨立的 GA 追蹤 ID
         'environment_name': 'production',
         'debug_mode': False,
-        'url': 'https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app'
+        'url': 'https://japan-property-analyzer-prod-2dal3iq3qa-an.a.run.app'
     }
 }
 
