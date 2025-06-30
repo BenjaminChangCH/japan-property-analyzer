@@ -3,7 +3,7 @@ name: Production Deployment
 on:
   push:
     branches:
-      - main
+      - 'disabled-temporarily'  # 暫時禁用，使用 Cloud Build 觸發器
 
 jobs:
   deploy-production:
@@ -17,21 +17,12 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
-    - name: 'Authenticate to Google Cloud'
-      uses: 'google-github-actions/auth@v1'
-      with:
-        workload_identity_provider: 'projects/864942598341/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
-        service_account: 'github-actions-sa@japan-property-analyzer.iam.gserviceaccount.com'
-
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
-
-    - name: 'Submit to Cloud Build for Production'
+    - name: 'Notify - Using Cloud Build Instead'
       run: |
-        gcloud builds submit --config deployment/cloudbuild-production.yaml . 
-        
-    - name: 'Notify PRD Deployment Complete'
-      run: |
-        echo "🎉 PRD 環境部署完成！"
-        echo "🌐 生產網址: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app"
-        echo "✅ 生產環境已更新並正常運行" 
+        echo "ℹ️ GitHub Actions 部署已暫時禁用"
+        echo "🔄 PRD 環境使用 Cloud Build 觸發器自動部署"
+        echo "🌐 PRD 網址: https://japan-property-analyzer-prod-2dal3iq3qa-an.a.run.app"
+        echo ""
+        echo "📋 如需重新啟用 GitHub Actions 部署："
+        echo "1. 設定 Workload Identity Federation"
+        echo "2. 修改觸發分支回 'main'" 
