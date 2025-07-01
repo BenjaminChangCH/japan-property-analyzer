@@ -32,29 +32,42 @@
 - CSRF 保護
 
 ### 2. 案件管理系統 (Property Management)
-**狀態：🔴 未開始**
+**狀態：🔴 未開始 (0%) | 優先級：🔴 高**
 
 #### 功能需求
-- 新增/編輯/刪除不動產案件
-- 案件基本資訊管理（地址、價格、類型等）
-- 案件狀態追蹤（考慮中、已購買、已出售）
-- 案件分類和標籤系統
-- 案件搜尋和篩選
+- **案件 CRUD 操作**：新增、編輯、刪除、查看案件
+- **案件列表管理**：卡片式展示，支援搜尋篩選
+- **狀態追蹤**：考慮中 🟡 / 已購買 🟢 / 已出售 🔴
+- **標籤分類系統**：自定義標籤，靈活分類
+- **財務分析整合**：案件參數儲存，快速分析
+- **案件比較功能**：多案件並排比較分析
+- **行動端優化**：響應式設計，觸控友善
 
-#### 資料結構
+#### 詳細規劃
+📋 **完整 PRD 文檔**：`docs/PROPERTY_MANAGEMENT_PRD.md`
+
+#### 開發階段規劃
+- **Phase 1 (2-3週)**：基礎 CRUD 功能 + 案件列表
+- **Phase 2 (2-3週)**：搜尋篩選 + 標籤系統
+- **Phase 3 (2-3週)**：分析整合 + 案件比較
+- **Phase 4 (1-2週)**：優化與部署
+
+#### 資料結構 (已完成)
 ```python
+# 使用現有 models.py 中的 Property 模型
 Property = {
     'id': str,
-    'user_id': str,
+    'user_id': str,  # 關聯到 User
     'name': str,
     'address': str,
     'property_type': str,  # 1LDK, 2LDK, tower, house
-    'price': float,
+    'price': Decimal,
     'status': str,  # considering, purchased, sold
+    'parameters': JSON,  # 財務分析參數
+    'tags': JSON,  # 標籤列表
+    'notes': str,
     'created_at': datetime,
-    'updated_at': datetime,
-    'tags': List[str],
-    'notes': str
+    'updated_at': datetime
 }
 ```
 
