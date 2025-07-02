@@ -19,7 +19,7 @@ ENVIRONMENTS = {
         'ga_tracking_id': 'G-59XMZ0SZ0G',
         'environment_name': 'staging', 
         'debug_mode': True,
-        'url': 'https://japan-property-analyzer-2dal3iq3qa-an.a.run.app'
+        'url': 'https://japan-property-analyzer-2dal3iq3qa-an.a.run.app'  # 正確的STG環境URL
     },
     'production': {
         'ga_tracking_id': 'G-94SVDFL5YN',  # PRD 環境獨立的 GA 追蹤 ID
