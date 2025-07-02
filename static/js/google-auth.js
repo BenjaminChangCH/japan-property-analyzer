@@ -13,17 +13,19 @@ class GoogleAuthManager {
         this.clientId = null;
         this.currentUser = null;
         this.config = {
-            auto_select: false,
-            cancel_on_tap_outside: true,
-            use_fedcm_for_prompt: false,  // 暫時禁用 FedCM 以避免兼容性問題
-            ux_mode: 'popup',
-            context: 'signin',
-            itp_support: true
+            auto_select: false,              // 禁用自動選擇
+            cancel_on_tap_outside: true,     // 點擊外部時取消
+            use_fedcm_for_prompt: false,     // 暫時禁用 FedCM 避免兼容性問題
+            ux_mode: 'popup',                // 使用彈窗模式
+            context: 'signin',               // 設定上下文為登入
+            itp_support: true,               // 支援 ITP (Intelligent Tracking Prevention)
+            state_cookie_domain: window.location.hostname  // 設定狀態 Cookie 域名
         };
         
         // 綁定 this 上下文
         this.handleSignIn = this.handleSignIn.bind(this);
         this.logout = this.logout.bind(this);
+        this.useBackupLogin = this.useBackupLogin.bind(this);
     }
 
     /**
@@ -122,72 +124,36 @@ class GoogleAuthManager {
      * 設置 Google 原生登入按鈕
      */
     setupGoogleButtons() {
-        try {
-            // 為導航列按鈕創建 Google 原生按鈕
-            const headerBtn = document.getElementById('googleLoginBtnHeader');
-            if (headerBtn && google.accounts.id.renderButton) {
-                // 創建一個隱藏的容器來放置 Google 按鈕
-                const hiddenContainer = document.createElement('div');
-                hiddenContainer.style.position = 'absolute';
-                hiddenContainer.style.left = '-9999px';
-                hiddenContainer.id = 'google-signin-header';
-                document.body.appendChild(hiddenContainer);
-
-                google.accounts.id.renderButton(hiddenContainer, {
-                    theme: 'outline',
-                    size: 'medium',
-                    type: 'standard',
-                    text: 'signin_with',
-                    shape: 'rectangular',
-                    logo_alignment: 'left'
-                });
-
-                // 點擊自定義按鈕時觸發 Google 按鈕
-                headerBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const googleBtn = hiddenContainer.querySelector('div[role="button"]');
-                    if (googleBtn) {
-                        googleBtn.click();
-                    } else {
-                        this.login();
-                    }
-                });
-            }
-
-            // 為分析頁面按鈕做同樣的處理
-            const analysisBtn = document.getElementById('googleLoginBtn');
-            if (analysisBtn && google.accounts.id.renderButton) {
-                const hiddenContainer2 = document.createElement('div');
-                hiddenContainer2.style.position = 'absolute';
-                hiddenContainer2.style.left = '-9999px';
-                hiddenContainer2.id = 'google-signin-analysis';
-                document.body.appendChild(hiddenContainer2);
-
-                google.accounts.id.renderButton(hiddenContainer2, {
-                    theme: 'outline',
-                    size: 'medium',
-                    type: 'standard',
-                    text: 'signin_with',
-                    shape: 'rectangular',
-                    logo_alignment: 'left'
-                });
-
-                analysisBtn.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    const googleBtn = hiddenContainer2.querySelector('div[role="button"]');
-                    if (googleBtn) {
-                        googleBtn.click();
-                    } else {
-                        this.login();
-                    }
-                });
-            }
-
-        } catch (error) {
-            console.warn('無法設置 Google 原生按鈕，使用備用方案:', error);
+        // 為導航列按鈕添加點擊事件
+        const headerBtn = document.getElementById('googleLoginBtnHeader');
+        if (headerBtn) {
+            headerBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.login();
+            });
         }
+
+        // 為分析頁面按鈕添加點擊事件
+        const analysisBtn = document.getElementById('googleLoginBtn');
+        if (analysisBtn) {
+            analysisBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.login();
+            });
+        }
+
+        // 添加備用登入按鈕（如果需要）
+        const backupButtons = document.querySelectorAll('[data-login-backup]');
+        backupButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('使用備用登入方案 - 直接重定向');
+                window.location.href = '/auth/login';
+            });
+        });
     }
 
     /**
@@ -202,24 +168,59 @@ class GoogleAuthManager {
         try {
             console.log('開始 Google 登入流程...');
             
-            // 直接使用 Google 登入提示
-            google.accounts.id.prompt((notification) => {
-                console.log('Google 登入提示狀態:', notification);
-                
-                if (notification.isNotDisplayed()) {
-                    const reason = notification.getNotDisplayedReason();
-                    console.log('登入提示未顯示，原因:', reason);
-                    this.handleLoginPromptError(reason);
-                } else if (notification.isSkippedMoment()) {
-                    const reason = notification.getSkippedReason();
-                    console.log('登入提示被跳過，原因:', reason);
-                    this.handleLoginPromptError(reason);
-                }
+            // 嘗試使用 Google One Tap，但設置短暫的超時時間
+            const oneTraPromise = new Promise((resolve, reject) => {
+                google.accounts.id.prompt((notification) => {
+                    console.log('Google 登入提示狀態:', notification);
+                    
+                    if (notification.isNotDisplayed()) {
+                        const reason = notification.getNotDisplayedReason();
+                        console.log('登入提示未顯示，原因:', reason);
+                        reject(reason);
+                    } else if (notification.isSkippedMoment()) {
+                        const reason = notification.getSkippedReason();
+                        console.log('登入提示被跳過，原因:', reason);
+                        reject(reason);
+                    } else {
+                        resolve(notification);
+                    }
+                });
             });
+
+            // 設置 2 秒超時，如果 One Tap 無法顯示，則使用備用方案
+            const timeoutPromise = new Promise((resolve, reject) => {
+                setTimeout(() => {
+                    reject('timeout');
+                }, 2000);
+            });
+
+            Promise.race([oneTraPromise, timeoutPromise])
+                .catch((reason) => {
+                    console.log('One Tap 失敗，使用備用登入方案，原因:', reason);
+                    this.useBackupLogin(reason);
+                });
+
         } catch (error) {
             console.error('Google 登入錯誤:', error);
-            this.showError('登入失敗', '請檢查網路連接並重試');
+            this.useBackupLogin('error');
         }
+    }
+
+    /**
+     * 使用備用登入方案 - 直接重定向到後端 OAuth
+     */
+    useBackupLogin(reason) {
+        console.log('使用備用登入方案...');
+        
+        // 如果是特定的錯誤，直接重定向到後端 OAuth
+        if (reason === 'suppressed_by_user' || reason === 'timeout' || reason === 'opt_out_or_no_session') {
+            console.log('使用後端 OAuth 重定向...');
+            window.location.href = '/auth/login';
+            return;
+        }
+
+        // 其他錯誤仍使用原有的錯誤處理
+        this.handleLoginPromptError(reason);
     }
 
     /**
@@ -428,13 +429,18 @@ class GoogleAuthManager {
                 this.showError('缺少 Client ID', '請聯絡開發者設定 Google OAuth Client ID');
                 break;
             case 'opt_out_or_no_session':
-                this.showError('需要授權', '請點擊登入按鈕並選擇您的 Google 帳戶進行授權');
+                console.log('用戶需要授權，重定向到登入頁面...');
+                window.location.href = '/auth/login';
                 break;
             case 'secure_http_required':
                 this.showError('需要安全連接', '請使用 HTTPS 或 localhost 訪問此網站');
                 break;
             case 'suppressed_by_user':
-                this.showError('登入被取消', '您取消了登入，請重新點擊登入按鈕');
+                // 不再顯示錯誤，而是自動使用備用登入方案
+                console.log('One Tap 被用戶抑制，自動使用備用登入方案...');
+                setTimeout(() => {
+                    window.location.href = '/auth/login';
+                }, 1000);
                 break;
             case 'unregistered_origin':
                 this.showError('網域未授權', 
@@ -445,12 +451,11 @@ class GoogleAuthManager {
                 break;
             case 'unknown_reason':
             default:
-                this.showError('登入失敗', 
-                    `未知錯誤，請嘗試：\n` +
-                    `1. 重新整理頁面\n` +
-                    `2. 清除瀏覽器快取\n` +
-                    `3. 檢查網路連接\n` +
-                    `4. 如問題持續，請聯絡技術支援`);
+                // 未知錯誤也嘗試使用備用方案
+                console.log('未知錯誤，嘗試備用登入方案...');
+                setTimeout(() => {
+                    window.location.href = '/auth/login';
+                }, 1000);
                 break;
         }
     }
