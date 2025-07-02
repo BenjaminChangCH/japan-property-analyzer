@@ -1,168 +1,158 @@
-# 🏠 日本不動產投資分析工具
+# 🏯 Japan Property Analyzer
 
-這是一個專業的日本不動產投資財務分析 Web 應用程式，旨在幫助投資者分析不同投資策略的財務回報。本應用程式基於 Flask (Python) 開發，並計劃未來擴展為 iOS/Android 應用程式。
+*Professional Investment Intelligence - 日本不動產投資專業分析平台*
+
+[![Version](https://img.shields.io/badge/version-v1.3.0-blue)](version.py)
+[![Python](https://img.shields.io/badge/python-3.11+-green)](requirements.txt)
+[![Flask](https://img.shields.io/badge/flask-2.0+-orange)](requirements.txt)
+[![License](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
+
+## 🌟 專案概述
+
+Japan Property Analyzer 是一個專業的日本不動產投資財務分析 Web 應用程式，幫助投資者進行精確的投資回報分析和風險評估。
+
+### 核心特色
+- 🧮 **專業財務分析**：IRR、NPV、現金流預測
+- 📊 **多元變現模式**：Airbnb、長租、店鋪經營分析
+- 📱 **響應式設計**：支援桌面和行動裝置
+- 📄 **PDF 報告生成**：專業投資分析報告
+- 🔐 **安全部署**：Google Cloud Platform 託管
 
 ## 🚀 快速開始
 
+### 環境需求
+- Python 3.11+
+- Flask 2.0+
+- Google Cloud SDK (部署用)
+
 ### 本地開發
 ```bash
-# 克隆專案
+# 1. 克隆專案
 git clone <repository-url>
 cd Project\ Japan
 
-# 創建虛擬環境
+# 2. 設置虛擬環境
 python -m venv .venv
-source .venv/bin/activate  # macOS/Linux
-# 或 .venv\Scripts\activate  # Windows
+source .venv/bin/activate
 
-# 安裝依賴
+# 3. 安裝依賴
 pip install -r requirements.txt
 
-# 運行應用程式
+# 4. 啟動應用程式
 python main.py
 ```
 
-### 🎯 開發完成檢查系統
+訪問 `http://localhost:5001` 開始使用
 
-本專案配備了完整的開發完成檢查系統，確保每次開發完成後環境一致性：
+## 🏗️ 專案架構
 
-```bash
-# 開發完成檢查（推薦每次開發完成後使用）
-python scripts/cursor_commands.py complete
-
-# 初始化新功能開發
-python scripts/cursor_commands.py init "功能名稱"
-
-# 快速狀態檢查
-python scripts/cursor_commands.py status
-
-# 查看所有可用指令
-python scripts/cursor_commands.py help
 ```
-
-**詳細使用說明**: 參考 [USAGE_GUIDE.md](USAGE_GUIDE.md)
-
-## 🌟 核心功能
-
-### 已完成功能 (80%)
-- ✅ **財務分析引擎**: 多種變現模式分析 (Airbnb、長租、店鋪)
-- ✅ **IRR 計算**: 內部報酬率計算和現金流預測
-- ✅ **PDF 報告生成**: 專業的分析報告輸出
-- ✅ **響應式 UI**: 現代化的使用者界面
-
-### 開發中功能
-- 🟡 **用戶認證系統**: Google OAuth 登入 (計劃中)
-- 🟡 **案件管理系統**: 投資案件收藏和管理 (計劃中)
-- 🟡 **AI 對話助手**: 智能投資建議 (計劃中)
-
-## 🏗️ 技術架構
-
-- **後端**: Flask (Python 3.11+)
-- **前端**: HTML/CSS/JavaScript
-- **部署**: Google Cloud Run
-- **CI/CD**: GitHub Actions
-- **資料庫**: 計劃使用 Cloud SQL
+Japan Property Analyzer/
+├── 📋 main.py              # 主應用程式入口
+├── 🔐 auth.py              # 用戶認證模組
+├── 📊 models.py            # 資料模型
+├── 📁 config/              # 配置管理
+├── 🎨 templates/           # HTML 模板
+├── 📦 static/              # 靜態資源
+├── 🧪 tests/               # 測試文件
+├── 🛠️ scripts/             # 工具腳本
+├── 📚 docs/                # 專案文檔
+└── 🚀 deployment/          # 部署配置
+```
 
 ## 🌐 部署環境
 
-- **STG 環境**: https://japan-property-analyzer-864942598341.asia-northeast1.run.app
-- **PRD 環境**: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app
-
-## 📊 專案進度
-
-| 模組 | 狀態 | 完成度 | 備註 |
-|------|------|--------|------|
-| 財務分析引擎 | 🟢 已完成 | 80% | 核心功能完成 |
-| 基礎架構 | 🟢 已完成 | 95% | 部署和 CI/CD 完成 |
-| 用戶認證系統 | 🔴 未開始 | 0% | 等待開發 |
-| 案件管理系統 | 🔴 未開始 | 0% | 等待開發 |
-| AI 對話助手 | 🔴 未開始 | 0% | 等待開發 |
-
-**詳細進度**: 參考 [docs/PRD.md](docs/PRD.md)
+| 環境 | 網址 | 用途 |
+|------|------|------|
+| **STG** | [測試環境](https://japan-property-analyzer-864942598341.asia-northeast1.run.app) | 功能測試和驗證 |
+| **PRD** | [生產環境](https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app) | 正式發布版本 |
 
 ## 🛠️ 開發工具
 
-### 簡化指令系統
-本專案使用簡化指令系統提高開發效率：
-
+### 腳本工具
 ```bash
-# 功能開發
-python scripts/cursor_commands.py init "新功能名稱"    # 初始化新功能
-python scripts/cursor_commands.py complete           # 開發完成檢查
+# 開發工具
+./scripts/development/start_dev.sh        # 啟動開發環境
+python scripts/development/dev_complete_check.py  # 開發完成檢查
 
-# 專案管理
-python scripts/cursor_commands.py status            # 檢查專案狀態
-python scripts/cursor_commands.py prd               # PRD 狀態統計
-python scripts/cursor_commands.py clean             # 清理臨時文件
+# 維護工具
+python scripts/maintenance/quality_checker.py     # 程式碼品質檢查
+python scripts/maintenance/version_manager.py     # 版本管理
 
-# 版本控制
-python scripts/cursor_commands.py version           # 檢查版本信息
-python scripts/cursor_commands.py changelog         # 檢查變更記錄
-python scripts/cursor_commands.py release v1.3.0    # 準備版本發布
+# OAuth 工具
+python scripts/oauth/setup_oauth.py       # OAuth 設定
 ```
 
-### 開發流程
-1. **初始化**: 使用 `/init` 創建新功能分支和模板
-2. **開發**: 實現功能邏輯和測試
-3. **檢查**: 使用 `/complete` 進行完整檢查
-4. **部署**: 推送到 STG 環境測試
-5. **發布**: 合併到 main 分支部署到 PRD
+### CI/CD 流程
+1. **開發** → `feature/` 分支開發
+2. **測試** → 自動部署到 STG 環境
+3. **審查** → Pull Request 代碼審查
+4. **發布** → 合併到 `main` 分支部署到 PRD
 
-## 📚 文檔
+詳細流程請參考 [CI/CD 文檔](docs/CI_CD_WORKFLOW.md)
 
-- [產品需求文檔 (PRD)](docs/PRD.md) - 完整的產品規劃和需求
-- [程式碼分析報告](docs/CODE_ANALYSIS.md) - 技術架構和程式碼分析
-- [使用指南](USAGE_GUIDE.md) - 開發完成檢查系統使用說明
-- [快速參考](CURSOR_QUICK_REFERENCE.md) - Cursor 指令快速參考
-- [版本記錄](docs/CHANGELOG.md) - 版本變更和發布記錄
+## 📊 功能特色
+
+### ✅ 已完成功能
+- **財務分析引擎**：多變現模式 ROI 計算
+- **風險評估系統**：投資風險等級分析
+- **報表生成**：PDF 格式專業報告
+- **響應式介面**：跨裝置使用體驗
+
+### 🔄 規劃功能
+- **用戶系統**：Google OAuth 登入
+- **案件管理**：投資案件收藏追蹤
+- **AI 助手**：智能投資建議
+
+## 📚 文檔中心
+
+| 文檔 | 說明 |
+|------|------|
+| [📋 PRD](docs/PRD.md) | 產品需求文檔 |
+| [📝 CHANGELOG](docs/CHANGELOG.md) | 版本變更記錄 |
+| [🎨 設計系統](docs/guides/DESIGN_SYSTEM.md) | UI/UX 設計規範 |
+| [🔐 OAuth 設定](docs/guides/GOOGLE_OAUTH_SETUP.md) | 認證系統指南 |
+| [🚀 部署流程](docs/CI_CD_WORKFLOW.md) | CI/CD 指南 |
+
+更多文檔請參考 [docs/README.md](docs/README.md)
 
 ## 🤝 貢獻指南
 
-1. Fork 專案
-2. 創建功能分支 (`git checkout -b feature/amazing-feature`)
-3. 使用 `/complete` 檢查開發完成狀態
-4. 提交變更 (`git commit -m 'feat: add amazing feature'`)
-5. 推送到分支 (`git push origin feature/amazing-feature`)
-6. 創建 Pull Request
+1. **Fork** 專案到您的 GitHub 帳戶
+2. **建立分支**: `git checkout -b feature/new-feature`
+3. **提交變更**: `git commit -m 'feat: add new feature'`
+4. **推送分支**: `git push origin feature/new-feature`
+5. **建立 PR**: 提交 Pull Request 進行審查
 
-## 📄 授權
+### 提交規範
+- `feat:` 新功能
+- `fix:` 錯誤修復
+- `docs:` 文檔更新
+- `style:` 格式調整
+- `refactor:` 程式碼重構
+- `test:` 測試相關
 
-本專案採用 MIT 授權 - 詳見 [LICENSE](LICENSE) 文件
+## 📄 版本資訊
 
-## 📞 聯絡
+**當前版本**: v1.3.0  
+**發布日期**: 2025-07-02  
+**開發者**: Benjamin Chang
 
-Benjamin Chang - 專案維護者
+查看完整版本歷史請參考 [CHANGELOG.md](docs/CHANGELOG.md)
 
----
+## 📞 技術支援
 
-**開發提示**: 建議每次開發完成後使用 `python scripts/cursor_commands.py complete` 進行完整檢查，確保程式碼品質和專案一致性。
+- **專案維護**: Benjamin Chang
+- **問題回報**: [GitHub Issues](https://github.com/username/japan-property-analyzer/issues)
+- **功能建議**: [GitHub Discussions](https://github.com/username/japan-property-analyzer/discussions)
 
-## 專案進度管理
+## 📜 授權條款
 
-本專案的詳細功能需求、開發進度與狀態追蹤，請參閱 `docs/PRD.md` 文件。所有模組的完成度、版本資訊和未來規劃都將在該文件中維護。
-
-## 技術棧
-
-- **後端**: Python 3.11+, Flask
-- **前端**: HTML, CSS, JavaScript
-- **部署**: Google Cloud Platform (Cloud Run)
-
-## 目錄結構
-
-```
-/
-├── main.py                 # 主應用程式
-├── config/                 # 配置模組
-├── templates/              # HTML 模板
-├── static/                 # 靜態資源
-│   ├── css/
-│   ├── js/
-│   └── images/
-├── tests/                  # 測試檔案
-├── docs/                   # 文件 (含 PRD.md)
-├── deployment/             # 部署相關
-└── scripts/                # 工具腳本
-```
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](LICENSE) 文件
 
 ---
-*最新更新日期: 2024-07-29* 
+
+<p align="center">
+  <strong>🏯 Professional Investment Intelligence</strong><br>
+  專業投資分析，智慧決策支援
+</p>

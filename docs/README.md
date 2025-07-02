@@ -1,88 +1,50 @@
-# 📚 文檔目錄索引
+# 📚 Japan Property Analyzer - 文檔中心
 
 ## 📋 核心文檔
 
-### 專案管理
-- [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) - 🎯 **專案管理中心** (統一管理入口)
-- [`PRD.md`](PRD.md) - 產品需求文檔，包含功能規格和開發進度
-- [`CHANGELOG.md`](CHANGELOG.md) - 版本變更記錄
-
-### 案件管理系統 (當前開發重點)
-- [`PROPERTY_MANAGEMENT_PRD.md`](PROPERTY_MANAGEMENT_PRD.md) - 案件管理詳細需求規格
-- [`PROPERTY_MANAGEMENT_ROADMAP.md`](PROPERTY_MANAGEMENT_ROADMAP.md) - 開發路線圖和時程規劃
-- [`PROPERTY_MANAGEMENT_QUICKSTART.md`](PROPERTY_MANAGEMENT_QUICKSTART.md) - 快速開始指南
+### 產品規格
+- [產品需求文檔 (PRD)](PRD.md) - 完整的產品規格和功能需求
+- [變更記錄 (CHANGELOG)](CHANGELOG.md) - 版本更新歷史
 
 ### 開發指南
-- [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) - 完整設計系統規範
-- [`guides/DESIGN_SYSTEM_QUICK_REF.md`](guides/DESIGN_SYSTEM_QUICK_REF.md) - 設計系統快速參考
-- [`guides/TYPOGRAPHY_SYSTEM.md`](guides/TYPOGRAPHY_SYSTEM.md) - 字體系統規範
-- [`guides/GOOGLE_OAUTH_SETUP.md`](guides/GOOGLE_OAUTH_SETUP.md) - Google OAuth 設定指南
-- [`guides/CODE_ANALYSIS.md`](guides/CODE_ANALYSIS.md) - 程式碼分析報告
+- [設計系統規範](guides/DESIGN_SYSTEM.md) - UI/UX 設計標準
+- [Google OAuth 設定指南](guides/GOOGLE_OAUTH_SETUP.md) - 認證系統設定
+- [CI/CD 部署流程](CI_CD_WORKFLOW.md) - 持續整合與部署指南
 
-## 📁 目錄結構
+### 快速參考
+- [設計系統快速參考](guides/DESIGN_SYSTEM_QUICK_REF.md)
+- [字體系統指南](guides/TYPOGRAPHY_SYSTEM.md)
+- [程式碼分析報告](guides/CODE_ANALYSIS.md)
+
+## 📁 文檔結構
 
 ```
 docs/
-├── README.md                           # 本文檔索引
-├── PROJECT_MANAGEMENT.md               # 🎯 專案管理中心
-├── PRD.md                             # 產品需求文檔
-├── CHANGELOG.md                       # 版本變更記錄
-├── CI_CD_WORKFLOW.md                  # CI/CD 部署流程
-├── PROPERTY_MANAGEMENT_PRD.md         # 案件管理詳細需求
-├── PROPERTY_MANAGEMENT_ROADMAP.md     # 案件管理開發路線圖
-├── PROPERTY_MANAGEMENT_QUICKSTART.md  # 案件管理快速開始
-├── guides/                            # 開發指南
-│   ├── DESIGN_SYSTEM.md               # 設計系統規範
-│   ├── DESIGN_SYSTEM_QUICK_REF.md     # 設計系統快速參考
-│   ├── TYPOGRAPHY_SYSTEM.md           # 字體系統規範
-│   ├── GOOGLE_OAUTH_SETUP.md          # Google OAuth 設定指南
-│   └── CODE_ANALYSIS.md               # 程式碼分析報告
-└── archive/                           # 歸檔文件
-    ├── oauth-fixes/                   # OAuth 修復相關文檔
-    └── completion-reports/            # 開發完成報告
+├── README.md                    # 文檔中心（本檔案）
+├── PRD.md                      # 產品需求文檔
+├── CHANGELOG.md                # 版本變更記錄
+├── CI_CD_WORKFLOW.md           # 部署流程
+├── guides/                     # 開發指南
+│   ├── DESIGN_SYSTEM.md        # 設計系統
+│   ├── GOOGLE_OAUTH_SETUP.md   # OAuth 設定
+│   └── ...
+└── archive/                    # 歷史文檔歸檔
+    ├── oauth-fixes/            # OAuth 相關修復記錄
+    └── completion-reports/     # 完成報告歸檔
 ```
 
-## 🎯 快速導航
+## 🔧 維護指南
 
-### 🚀 開始開發
-1. 📋 閱讀 [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) 了解專案整體狀況
-2. 🎯 查看 [`PROPERTY_MANAGEMENT_QUICKSTART.md`](PROPERTY_MANAGEMENT_QUICKSTART.md) 開始案件管理開發
-3. 🎨 參考 [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) 了解設計規範
-4. ⚡ 使用根目錄的 [`QUICK_REFERENCE.md`](../QUICK_REFERENCE.md) 學習快捷指令
+### 文檔更新規則
+1. **核心文檔**：直接在 docs/ 根目錄更新
+2. **技術指南**：放置在 guides/ 子目錄
+3. **歷史記錄**：歸檔至 archive/ 目錄
+4. **臨時文檔**：完成後移至 archive/ 或刪除
 
-### 🎨 UI/UX 開發
-1. [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) - 完整設計系統
-2. [`guides/TYPOGRAPHY_SYSTEM.md`](guides/TYPOGRAPHY_SYSTEM.md) - 字體規範
-3. [`guides/DESIGN_SYSTEM_QUICK_REF.md`](guides/DESIGN_SYSTEM_QUICK_REF.md) - 快速參考
-
-### 🔧 技術實作
-1. [`guides/GOOGLE_OAUTH_SETUP.md`](guides/GOOGLE_OAUTH_SETUP.md) - OAuth 整合
-2. [`guides/CODE_ANALYSIS.md`](guides/CODE_ANALYSIS.md) - 程式碼分析
-3. [`CHANGELOG.md`](CHANGELOG.md) - 版本歷史
-
-### 📊 專案管理
-1. [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) - 🎯 **專案管理中心**
-2. [`PRD.md`](PRD.md) - 需求和進度追蹤
-3. [`CHANGELOG.md`](CHANGELOG.md) - 版本發布記錄
-4. [`archive/`](archive/) - 歸檔文檔
-
-## 📝 文檔維護規則
-
-### 新增文檔
-1. 根據類型放入對應目錄
-2. 更新本索引文檔
-3. 在 CHANGELOG.md 中記錄
-
-### 歸檔文檔
-1. 過時文檔移至 `archive/` 目錄
-2. 保留重要歷史記錄
-3. 更新索引移除過時連結
-
-### 文檔命名規範
-- 使用英文大寫和底線：`DESIGN_SYSTEM.md`
-- 日期格式：`YYYY-MM-DD`
-- 版本格式：`v1.2.0`
+### 版本控制
+- 重要變更需更新 CHANGELOG.md
+- 每次 PR 需檢查相關文檔是否需要更新
+- 保持文檔與程式碼同步
 
 ---
-
-**提示**：所有文檔都使用繁體中文撰寫，遵循專案的語言規範。 
+*最後更新：2025-07-02* 
