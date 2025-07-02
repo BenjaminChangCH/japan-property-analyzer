@@ -118,46 +118,6 @@ def index():
                          environment=ENVIRONMENT,
                          no_index=NO_INDEX)
 
-@app.route('/analysis')
-@rate_limit(max_requests=30)
-def analysis():
-    app.logger.info(f"財務分析頁面訪問 - 環境: {ENVIRONMENT}")
-    
-    return render_template('index.html', 
-                         version=VERSION,
-                         ga_tracking_id=GA_TRACKING_ID,
-                         environment=ENVIRONMENT)
-
-@app.route('/market')
-@rate_limit(max_requests=30)
-def market():
-    app.logger.info(f"市場洞察頁面訪問 - 環境: {ENVIRONMENT}")
-    
-    return render_template('index.html', 
-                         version=VERSION,
-                         ga_tracking_id=GA_TRACKING_ID,
-                         environment=ENVIRONMENT)
-
-@app.route('/portfolio')
-@rate_limit(max_requests=30)
-def portfolio():
-    app.logger.info(f"投資組合頁面訪問 - 環境: {ENVIRONMENT}")
-    
-    return render_template('index.html', 
-                         version=VERSION,
-                         ga_tracking_id=GA_TRACKING_ID,
-                         environment=ENVIRONMENT)
-
-@app.route('/about')
-@rate_limit(max_requests=30)
-def about():
-    app.logger.info(f"關於我們頁面訪問 - 環境: {ENVIRONMENT}")
-    
-    return render_template('index.html', 
-                         version=VERSION,
-                         ga_tracking_id=GA_TRACKING_ID,
-                         environment=ENVIRONMENT)
-
 @app.route('/version')
 def version():
     """API 端點：返回應用程式版本資訊"""
@@ -735,6 +695,4 @@ def compute_irr(cash_flows, initial_investment_period=10, tolerance=1e-6, max_it
 if __name__ == '__main__':
     # 在開發環境啟用除錯模式
     debug_mode = ENVIRONMENT == 'development'
-    # 本地開發環境預設使用 5001 端口
-    default_port = 5001 if debug_mode else 8080
-    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', default_port))) 
+    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 

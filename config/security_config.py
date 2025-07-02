@@ -38,19 +38,14 @@ def setup_security_headers(app):
         if os.environ.get('ENVIRONMENT') == 'production':
             response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
         
-        # CSP 設定 - 支援 Google OAuth 和 Google Fonts
+        # CSP 設定
         csp = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://accounts.google.com; "
-            "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com https://accounts.google.com; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; "
-            "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://accounts.google.com; "
+            "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
-            "img-src 'self' data: https://www.google-analytics.com https://lh3.googleusercontent.com https://accounts.google.com; "
-            "connect-src 'self' https://www.google-analytics.com https://accounts.google.com https://identitytoolkit.googleapis.com; "
-            "frame-src https://accounts.google.com; "
-            "object-src 'none'; "
-            "base-uri 'self'; "
+            "img-src 'self' data: https://www.google-analytics.com https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com; "
+            "connect-src 'self' https://www.google-analytics.com; "
         )
         response.headers['Content-Security-Policy'] = csp
         

@@ -1,88 +1,88 @@
-# 📚 文檔目錄索引
+# 📚 Japan Property Analyzer - 文檔中心
 
-## 📋 核心文檔
-
-### 專案管理
-- [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) - 🎯 **專案管理中心** (統一管理入口)
-- [`PRD.md`](PRD.md) - 產品需求文檔，包含功能規格和開發進度
-- [`CHANGELOG.md`](CHANGELOG.md) - 版本變更記錄
-
-### 案件管理系統 (當前開發重點)
-- [`PROPERTY_MANAGEMENT_PRD.md`](PROPERTY_MANAGEMENT_PRD.md) - 案件管理詳細需求規格
-- [`PROPERTY_MANAGEMENT_ROADMAP.md`](PROPERTY_MANAGEMENT_ROADMAP.md) - 開發路線圖和時程規劃
-- [`PROPERTY_MANAGEMENT_QUICKSTART.md`](PROPERTY_MANAGEMENT_QUICKSTART.md) - 快速開始指南
-
-### 開發指南
-- [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) - 完整設計系統規範
-- [`guides/DESIGN_SYSTEM_QUICK_REF.md`](guides/DESIGN_SYSTEM_QUICK_REF.md) - 設計系統快速參考
-- [`guides/TYPOGRAPHY_SYSTEM.md`](guides/TYPOGRAPHY_SYSTEM.md) - 字體系統規範
-- [`guides/GOOGLE_OAUTH_SETUP.md`](guides/GOOGLE_OAUTH_SETUP.md) - Google OAuth 設定指南
-- [`guides/CODE_ANALYSIS.md`](guides/CODE_ANALYSIS.md) - 程式碼分析報告
-
-## 📁 目錄結構
-
-```
-docs/
-├── README.md                           # 本文檔索引
-├── PROJECT_MANAGEMENT.md               # 🎯 專案管理中心
-├── PRD.md                             # 產品需求文檔
-├── CHANGELOG.md                       # 版本變更記錄
-├── CI_CD_WORKFLOW.md                  # CI/CD 部署流程
-├── PROPERTY_MANAGEMENT_PRD.md         # 案件管理詳細需求
-├── PROPERTY_MANAGEMENT_ROADMAP.md     # 案件管理開發路線圖
-├── PROPERTY_MANAGEMENT_QUICKSTART.md  # 案件管理快速開始
-├── guides/                            # 開發指南
-│   ├── DESIGN_SYSTEM.md               # 設計系統規範
-│   ├── DESIGN_SYSTEM_QUICK_REF.md     # 設計系統快速參考
-│   ├── TYPOGRAPHY_SYSTEM.md           # 字體系統規範
-│   ├── GOOGLE_OAUTH_SETUP.md          # Google OAuth 設定指南
-│   └── CODE_ANALYSIS.md               # 程式碼分析報告
-└── archive/                           # 歸檔文件
-    ├── oauth-fixes/                   # OAuth 修復相關文檔
-    └── completion-reports/            # 開發完成報告
-```
+歡迎來到日本不動產投資分析工具的文檔中心。這裡包含了完整的專案文檔、開發指南和技術資料。
 
 ## 🎯 快速導航
 
-### 🚀 開始開發
-1. 📋 閱讀 [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) 了解專案整體狀況
-2. 🎯 查看 [`PROPERTY_MANAGEMENT_QUICKSTART.md`](PROPERTY_MANAGEMENT_QUICKSTART.md) 開始案件管理開發
-3. 🎨 參考 [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) 了解設計規範
-4. ⚡ 使用根目錄的 [`QUICK_REFERENCE.md`](../QUICK_REFERENCE.md) 學習快捷指令
+### 核心文檔
+- [📋 PRD - 產品需求文檔](./PRD.md) - 完整的產品需求和功能規格
+- [🚀 快速開始指南](./guides/QUICKSTART.md) - 5分鐘快速上手
+- [📖 用戶手冊](./guides/USER_GUIDE.md) - 詳細使用說明
 
-### 🎨 UI/UX 開發
-1. [`guides/DESIGN_SYSTEM.md`](guides/DESIGN_SYSTEM.md) - 完整設計系統
-2. [`guides/TYPOGRAPHY_SYSTEM.md`](guides/TYPOGRAPHY_SYSTEM.md) - 字體規範
-3. [`guides/DESIGN_SYSTEM_QUICK_REF.md`](guides/DESIGN_SYSTEM_QUICK_REF.md) - 快速參考
+### 開發文檔
+- [🏗️ 架構設計](./MODULAR_ARCHITECTURE_REPORT.md) - 系統架構和模組設計
+- [🔐 認證系統](./GOOGLE_LOGIN_IMPLEMENTATION.md) - Google OAuth 登入實作
+- [🚀 CI/CD 流程](./CI_CD_WORKFLOW.md) - 自動化部署流程
+- [📝 變更日誌](./CHANGELOG.md) - 版本更新記錄
 
-### 🔧 技術實作
-1. [`guides/GOOGLE_OAUTH_SETUP.md`](guides/GOOGLE_OAUTH_SETUP.md) - OAuth 整合
-2. [`guides/CODE_ANALYSIS.md`](guides/CODE_ANALYSIS.md) - 程式碼分析
-3. [`CHANGELOG.md`](CHANGELOG.md) - 版本歷史
+### 專案管理
+- [📊 專案管理](./PROJECT_MANAGEMENT.md) - 開發流程和里程碑
+- [🗺️ 產品路線圖](./PROPERTY_MANAGEMENT_ROADMAP.md) - 功能發展規劃
 
-### 📊 專案管理
-1. [`PROJECT_MANAGEMENT.md`](PROJECT_MANAGEMENT.md) - 🎯 **專案管理中心**
-2. [`PRD.md`](PRD.md) - 需求和進度追蹤
-3. [`CHANGELOG.md`](CHANGELOG.md) - 版本發布記錄
-4. [`archive/`](archive/) - 歸檔文檔
+### 歷史文檔
+- [📁 歸檔文件](./archive/) - 過往的完成報告和修復記錄
 
-## 📝 文檔維護規則
+## 🔧 開發環境
 
-### 新增文檔
-1. 根據類型放入對應目錄
-2. 更新本索引文檔
-3. 在 CHANGELOG.md 中記錄
+### 系統需求
+- Python 3.11+
+- Flask 2.0+
+- Node.js 16+ (用於前端工具)
 
-### 歸檔文檔
-1. 過時文檔移至 `archive/` 目錄
-2. 保留重要歷史記錄
-3. 更新索引移除過時連結
+### 快速啟動
+```bash
+# 1. 複製專案
+git clone https://github.com/BenjaminChangCH/japan-property-analyzer.git
+cd japan-property-analyzer
 
-### 文檔命名規範
-- 使用英文大寫和底線：`DESIGN_SYSTEM.md`
-- 日期格式：`YYYY-MM-DD`
-- 版本格式：`v1.2.0`
+# 2. 設置環境
+python -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+
+# 3. 設置環境變數
+cp env.example .env
+# 編輯 .env 文件設置必要的變數
+
+# 4. 啟動應用
+python main.py
+```
+
+### 部署環境
+- **STG**: https://japan-property-analyzer-864942598341.asia-northeast1.run.app
+- **PRD**: https://japan-property-analyzer-prod-864942598341.asia-northeast1.run.app
+
+## 📋 功能概覽
+
+### 核心功能
+- ✅ **財務分析計算** - 專業的不動產投資財務模型
+- ✅ **多種投資策略** - 支援 Airbnb、一般租賃、商業租賃
+- ✅ **風險評估** - 槓桿風險和投資健康度分析
+- ✅ **報告生成** - PDF 格式的專業分析報告
+
+### 用戶功能
+- ✅ **Google OAuth 登入** - 安全的用戶認證
+- ✅ **響應式設計** - 支援桌面和移動設備
+- ✅ **多語言介面** - 繁體中文和英文
+
+## 🤝 貢獻指南
+
+1. Fork 專案
+2. 創建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交變更 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 開啟 Pull Request
+
+## 📞 支援與聯絡
+
+- **問題回報**: [GitHub Issues](https://github.com/BenjaminChangCH/japan-property-analyzer/issues)
+- **功能建議**: [GitHub Discussions](https://github.com/BenjaminChangCH/japan-property-analyzer/discussions)
+- **開發者**: Benjamin Chang
+
+## 📄 授權條款
+
+本專案採用 MIT 授權條款 - 詳見 [LICENSE](../LICENSE) 文件。
 
 ---
 
-**提示**：所有文檔都使用繁體中文撰寫，遵循專案的語言規範。 
+💡 **提示**: 如果您是第一次使用，建議從[快速開始指南](./guides/QUICKSTART.md)開始。 
