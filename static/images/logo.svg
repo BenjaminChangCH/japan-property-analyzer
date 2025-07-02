@@ -1,0 +1,22 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景矩形框架 -->
+  <rect x="2" y="8" width="44" height="44" rx="6" fill="none" stroke="#D4AF37" stroke-width="2"/>
+  
+  <!-- 主要圖標 - 建築物輪廓 -->
+  <path d="M8 40 L24 20 L40 40 L40 46 L8 46 Z" fill="#2C3E50"/>
+  
+  <!-- 上升箭頭 -->
+  <path d="M30 25 L38 17 L42 21 L36 27 L30 25 Z" fill="#D4AF37"/>
+  <path d="M32 35 L34 30 L36 35 L34 40 Z" fill="#D4AF37"/>
+  
+  <!-- 圖表線條 -->
+  <path d="M10 38 L16 34 L22 36 L28 32 L34 28" stroke="#D4AF37" stroke-width="2" fill="none"/>
+  
+  <!-- 文字部分 -->
+  <text x="55" y="25" font-family="Arial, sans-serif" font-weight="700" font-size="14" fill="#2C3E50">
+    NIPPON PROPERTY
+  </text>
+  <text x="55" y="42" font-family="Arial, sans-serif" font-weight="400" font-size="12" fill="#D4AF37">
+    ANALYTICS
+  </text>
+</svg> 
