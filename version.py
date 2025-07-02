@@ -14,13 +14,13 @@ __version__ = "1.1.3"
 __version_info__ = tuple(map(int, __version__.split('.')))
 
 # 應用程式資訊
-APP_NAME = "Japan Property Analyzer"
-APP_DESCRIPTION = "日本不動產投資與商業模式財務分析"
+APP_NAME = "NIPPON PROPERTY ANALYTICS"
+APP_DESCRIPTION = "Professional Investment Intelligence - 日本不動產投資專業分析平台"
 APP_AUTHOR = "Benjamin Chang"
-APP_URL = "https://github.com/your-username/japan-property-analyzer"
+APP_URL = "https://github.com/your-username/nippon-property-analytics"
 
 # 發佈資訊
-RELEASE_DATE = "2025-06-12"
+RELEASE_DATE = "2025-07-02"
 BUILD_NUMBER = None  # 將由 CI/CD 系統自動設定
 
 def get_version():

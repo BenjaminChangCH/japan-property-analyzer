@@ -3,7 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>日本不動產投資與商業模式財務分析</title>
+    <title>NIPPON PROPERTY ANALYTICS - Professional Investment Intelligence</title>
+    <meta name="description" content="專業的日本不動產投資分析平台，提供全方位的財務分析、市場洞察與投資決策支援服務。">
+    
+    <!-- Google OAuth Configuration -->
+    <!-- 開發環境：請將下面的 YOUR_GOOGLE_CLIENT_ID 替換為真實的 Google OAuth Client ID -->
+    <meta name="google-client-id" content="864942598341-9mo8q9571hmbkj8eabhjcesgq44ddsul.apps.googleusercontent.com">
     
     <!-- Google Analytics 4 -->
     {% if ga_tracking_id %}
@@ -15,7 +20,7 @@
         gtag('js', new Date());
         
         var gaConfig = {
-            page_title: '日本不動產投資分析工具',
+            page_title: 'NIPPON PROPERTY ANALYTICS',
             page_location: window.location.href
         };
         
@@ -27,721 +32,1041 @@
         
         gtag('event', 'page_view', {
             environment: '{{ environment }}',
-            app_name: 'Japan Property Analyzer'
+            app_name: 'NIPPON PROPERTY ANALYTICS'
         });
     </script>
     {% endif %}
     
+    <!-- External Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Google OAuth SDK -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='images/logo.svg') }}">
 </head>
 <body>
-    <div id="loading-overlay">
-        <div class="spinner"></div>
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay">
+        <div class="loading-spinner"></div>
         <p id="loading-message">分析報告生成中，請稍候...</p>
     </div>
 
-    <div class="report-container" id="reportToPrint">
-        <div class="report-header">
-            <h1>日本不動產投資與商業模式財務分析</h1>
-            <p>為您提供最專業、最全面的日本不動產投資回報與商業模式的財務分析。</p>
+    <!-- Navigation Header -->
+    <header class="main-navbar">
+        <div class="navbar-container">
+            <!-- Logo -->
+            <div class="navbar-brand">
+                <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NIPPON PROPERTY ANALYTICS" class="brand-logo">
+            </div>
+            
+            <!-- Navigation Menu -->
+            <nav class="navbar-nav">
+                <a href="#home" class="nav-link active" data-section="home">首頁</a>
+                <a href="#analysis" class="nav-link" data-section="analysis">財務分析</a>
+                <a href="#market" class="nav-link" data-section="market">市場洞察</a>
+                <a href="#portfolio" class="nav-link" data-section="portfolio">投資組合</a>
+                <a href="#about" class="nav-link" data-section="about">關於我們</a>
+            </nav>
+            
+            <!-- Google Login Section -->
+            <div class="navbar-cta">
+                <button type="button" class="google-login-btn" id="googleLoginBtnHeader">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                    使用 Google 登入
+                </button>
+                <div id="userInfoHeader" class="user-info-header hidden">
+                    <div class="user-avatar-header">
+                        <img id="userAvatarHeader" src="" alt="用戶頭像">
+                    </div>
+                    <div class="user-menu">
+                        <div class="user-name-header" id="userNameHeader"></div>
+                        <button type="button" class="logout-btn" id="logoutBtnHeader">登出</button>
+                    </div>
+                </div>
+            </div>
         </div>
+    </header>
 
-        <div class="report-body">
-            <form id="property-form">
-                <div class="section" id="parameters">
-                    <h2>第一章：基本參數設定</h2>
-                    <div class="grid-container">
-                        <div class="form-group">
-                            <label for="purchaseType">購買身份</label>
-                            <select id="purchaseType">
-                                <option value="personal">個人身份</option>
-                                <option value="corporate" selected>設立法人</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="monetizationModel">
-                                變現模式
-                                 <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">選擇不同的變現模式，將會完全改變營運參數的設定與營收的計算方式。</span>
-                                </div>
-                            </label>
-                            <select id="monetizationModel">
-                                <option value="airbnb" selected>Airbnb 短租</option>
-                                <option value="personalLease">個人長租</option>
-                                <option value="commercialLease">店鋪出租</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="propertyType">
-                                房產類型
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">選擇不同房型將自動更新房價、租金、建物結構及相關成本的專家建議值，以反映市場實況。</span>
-                                </div>
-                            </label>
-                            <select id="propertyType">
-                                <option value="1LDK" selected>1LDK</option>
-                                <option value="2LDK">2LDK</option>
-                                <option value="tower">塔樓</option>
-                                <option value="house">一戶建</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="location">
-                                房產位置 (東京23區)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">選擇不同區域將連動更新房價與租金等專家建議值。目前模型以東京23區為基礎。</span>
-                                </div>
-                            </label>
-                            <select id="location">
-                                <optgroup label="都心5區 (Tier 1 - 高價區)">
-                                    <option value="Minato">港區</option>
-                                    <option value="Chiyoda">千代田區</option>
-                                    <option value="Chuo">中央區</option>
-                                    <option value="Shibuya">澀谷區</option>
-                                    <option value="Shinjuku">新宿區</option>
-                                </optgroup>
-                                <optgroup label="人氣職住區 (Tier 2 - 中高價區)">
-                                    <option value="Meguro">目黑區</option>
-                                    <option value="Setagaya">世田谷區</option>
-                                    <option value="Shinagawa">品川區</option>
-                                    <option value="Bunkyo">文京區</option>
-                                    <option value="Taito">台東區</option>
-                                    <option value="Toshima">豐島區</option>
-                                </optgroup>
-                                <optgroup label="標準住宅區 (Tier 3 - 標準區)">
-                                    <option value="Koto" selected>江東區</option>
-                                    <option value="Ota">大田區</option>
-                                    <option value="Suginami">杉並區</option>
-                                    <option value="Nakano">中野區</option>
-                                    <option value="Arakawa">荒川區</option>
-                                    <option value="Sumida">墨田區</option>
-                                    <option value="Itabashi">板橋區</option>
-                                    <option value="Nerima">練馬區</option>
-                                    <option value="Kita">北區</option>
-                                </optgroup>
-                                <optgroup label="東部/北部區 (Tier 4 - 實惠區)">
-                                    <option value="Adachi">足立區</option>
-                                    <option value="Katsushika">葛飾區</option>
-                                    <option value="Edogawa">江戶川區</option>
-                                </optgroup>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="loanOrigin">貸款來源</label>
-                            <select id="loanOrigin">
-                                <option value="japan">日本貸款</option>
-                                <option value="taiwan">台灣貸款</option>
-                                <option value="mixed">台灣信貸(頭期款) + 日本貸款</option>
-                            </select>
-                        </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <!-- Hero Section -->
+        <section id="home" class="hero-section">
+            <div class="hero-container">
+                <div class="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-text">Professional Investment Intelligence</span>
                     </div>
-
-                    <h3>1.1 房產與財務參數</h3>
-                    <div class="grid-container">
-                        <div class="form-group">
-                            <label for="propertyPrice">房產價格 (万円)</label>
-                            <input type="text" inputmode="decimal" id="propertyPrice" value="3000">
-                        </div>
-                        <div class="form-group">
-                            <label for="downPaymentRatio">頭期款比例 (%)</label>
-                            <input type="number" id="downPaymentRatio" value="20" min="0" max="100">
-                        </div>
-                        <div class="form-group">
-                            <label for="acquisitionCostRatio">
-                                初期購屋總成本比例 (%)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">包含仲介費、代書費、稅金等，佔房價的比例依物件價格而異。高價物件(如5000萬日幣以上)佔比較低，約6-8%；中低價物件佔比較高，約8-10%。8%為一綜合估算值。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="acquisitionCostRatio" value="8" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label for="initialFurnishingCost">
-                                初期家具家電設置費用 (万円)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">此為一次性投入的成本，用於購買經營所需的家具、家電、寢具、餐具等。對於Airbnb模式尤其重要。此費用將計入您的總投資額。</span>
-                                </div>
-                            </label>
-                            <input type="text" inputmode="decimal" id="initialFurnishingCost" value="100">
-                        </div>
-                        <div class="form-group corporate-param hidden">
-                            <label for="corporateSetupCost">
-                                法人設立費用 (万円)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">設立株式會社或合同會社所需的一次性行政、代書費用。此費用將計入您的總投資額。</span>
-                                </div>
-                            </label>
-                            <input type="text" inputmode="decimal" id="corporateSetupCost" value="25">
-                        </div>
-                        
-                        <div class="form-group loan-param hidden" data-loan-type="japan mixed">
-                            <label for="japanLoanInterestRate">日本房貸利率 (%)</label>
-                            <input type="number" id="japanLoanInterestRate" value="2.5" step="0.01">
-                        </div>
-                        <div class="form-group loan-param hidden" data-loan-type="japan mixed">
-                            <label for="japanLoanTerm">日本貸款年限</label>
-                            <input type="number" id="japanLoanTerm" value="25" min="1" max="35">
-                        </div>
-
-                        <div class="form-group loan-param hidden" data-loan-type="mixed">
-                            <label for="ownCapitalAmount">
-                                自備款金額 (万円)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">請輸入頭期款中，您打算投入的自有資金金額。剩餘的頭期款將被視為透過信貸取得。</span>
-                                </div>
-                            </label>
-                            <input type="text" inputmode="decimal" id="ownCapitalAmount" value="0">
-                        </div>
-
-                        <div class="form-group loan-param hidden" data-loan-type="taiwan">
-                            <label for="taiwanLoanInterestRate">台灣房貸利率 (%)</label>
-                            <input type="number" id="taiwanLoanInterestRate" value="2.1" step="0.01">
-                        </div>
-                        <div class="form-group loan-param hidden" data-loan-type="taiwan">
-                            <label for="taiwanLoanTerm">台灣貸款年限</label>
-                            <input type="number" id="taiwanLoanTerm" value="20" min="1" max="30">
-                        </div>
-
-                        <div class="form-group loan-param hidden" data-loan-type="mixed">
-                            <label for="creditLoanRate">
-                                台灣信貸利率 (%)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">此為參考值，實際利率將依個人信用狀況而定。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="creditLoanRate" value="4.5" step="0.01">
-                        </div>
-
-                        <div class="form-group">
-                            <label for="exchangeRate">日幣兌換台幣匯率</label>
-                            <input type="number" id="exchangeRate" value="0.22" step="0.01">
-                        </div>
-                    </div>
-
-                    <h3>1.2 營運參數</h3>
-                    
-                    <div id="airbnbParams">
-                        <div class="grid-container grid-container-large">
-                            <div class="form-group">
-                                <label for="operatingDaysCap">合法經營天數上限</label>
-                                <input type="number" id="operatingDaysCap" value="180">
-                            </div>
-                            <div class="form-group">
-                                <label for="occupancyRate">預期入住率 (於合法天數內)(%)</label>
-                                <input type="number" id="occupancyRate" value="80" max="100">
-                            </div>
-                            <div class="form-group">
-                                <label for="dailyRate">
-                                    預期每日平均租金 (ADR) (日幣)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為根據東京市場實務的建議值。ADR會因地段、季節、屋況和評價而有顯著差異，建議參考鄰近房源定價後調整。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="dailyRate" value="13000">
-                            </div>
-                            <div class="form-group">
-                                <label for="platformFeeRate">
-                                    平台服務費率 (%)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為根據日本市場實務的建議值。Airbnb標準拆帳費率約15%。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="platformFeeRate" value="15" step="0.1">
-                            </div>
-                            <div class="form-group">
-                                <label for="cleaningFee">
-                                    每次入住清潔費 (万円)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為根據東京市場實務的建議值。費用需涵蓋清潔人員薪資、交通以及消耗品（如洗髮精、毛巾）的補充。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="cleaningFee" value="0.5">
-                            </div>
-                            <div class="form-group">
-                                <label for="avgStayDuration">平均入住天數</label>
-                                <input type="number" id="avgStayDuration" value="4">
-                            </div>
-                             <div class="form-group">
-                                <label for="maxOccupancy">
-                                    最大收容人數
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此建議值會根據房產類型自動調整。一戶建通常能容納更多人數，是其主要賣點之一。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="maxOccupancy" value="4">
-                            </div>
-                             <div class="form-group">
-                                <label for="avgGuests">
-                                    平均入住人數
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">預估平均每筆訂單的實際入住人數，此數值將用於計算追加人頭費的收入。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="avgGuests" value="2">
-                            </div>
-                             <div class="form-group">
-                                <label for="baseOccupancyForFee">
-                                    追加費用起算人數
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">當入住人數超過此設定值時，將開始計算追加費用。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="baseOccupancyForFee" value="2">
-                            </div>
-                             <div class="form-group">
-                                <label for="extraGuestFee">
-                                    每人每晚追加費用
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">超過起算人數後，每位額外房客每晚需支付的費用。這是一戶建或大型房源的重要收入來源。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="extraGuestFee" value="0.2">
-                            </div>
-                            <div class="form-group">
-                                <label for="peakSeasonMarkup">
-                                    旺季加成比例 (%)
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">預估在旅遊旺季（如櫻花季、暑假、黃金週）時，ADR可比平時高出的百分比。模型將假設每年有3個月旺季進行估算。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="peakSeasonMarkup" value="15">
-                            </div>
-                            <div class="form-group">
-                                <label for="monthlyUtilities">
-                                    每月水電瓦斯網路費 (万円)
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為根據東京市場實務的建議值。此估算已考量到旅客使用能源的習慣（通常較高）以及高速網路的必要性。一戶建因獨立性，費用通常最高。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="monthlyUtilities" value="2.5">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="personalLeaseParams" class="hidden">
-                        <div class="grid-container">
-                            <div class="form-group">
-                                <label for="monthlyRent">
-                                    預估月租金 (万円)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">根據地點與房型估算的每月穩定租金收入。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="monthlyRent" value="15">
-                            </div>
-                            <div class="form-group">
-                                <label for="vacancyRate">
-                                    預估空置率 (%)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">根據東京市場，住宅空置率約在5-10%之間，取決於地點與物件條件。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="vacancyRate" value="8">
-                            </div>
-                            <div class="form-group">
-                                <label for="initialLeaseCostsRatio">
-                                    初期費用收入 (月租金倍數)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">包含禮金、押金、保證公司費等，通常可收到2-4個月的租金作為初期收入。此部分收入僅在第一年計算。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="initialLeaseCostsRatio" value="2.5">
-                            </div>
-                             <div class="form-group">
-                                <label for="leaseUtilities">
-                                    每月建物維護雜費 (万円)
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">長租模式下，租客自付水電瓦斯。此處僅估算房東需負擔的公共區域電費、網路等基本開銷。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="leaseUtilities" value="0.5">
-                            </div>
-                            <div class="form-group">
-                                <label for="leaseRenewalFeeFrequency">
-                                    更新料收取頻率 (年)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">日本長租契約通常每2年更新一次，屆時房東可收取一筆更新料作為額外收入。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="leaseRenewalFeeFrequency" value="2">
-                            </div>
-                            <div class="form-group">
-                                <label for="leaseRenewalFeeAmount">
-                                    更新料 (月租金倍數)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">更新料的金額通常是1個月的租金。此為續約時的一次性收入。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="leaseRenewalFeeAmount" value="1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div id="commercialLeaseParams" class="hidden">
-                        <div class="grid-container">
-                            <div class="form-group">
-                                <label for="monthlyRentCommercial">
-                                    預估月租金 (万円)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">店鋪租金高度依賴地點、樓層與面積。此為基於小型餐飲店的參考值。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="monthlyRentCommercial" value="25">
-                            </div>
-                            <div class="form-group">
-                                <label for="vacancyRateCommercial">
-                                    預估空置率 (%)
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">店鋪空置期風險較高，且更換租客的過渡期更長，建議保守估計，約10-15%。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="vacancyRateCommercial" value="12">
-                            </div>
-                            <div class="form-group">
-                                <label for="initialLeaseCostsRatioCommercial">
-                                    初期費用收入 (月租金倍數)
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">店鋪的保證金/敷金通常較高(6-12個月)，但在租約結束時需退還。此處僅估算不退還的部分（如禮金、更新料）。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="initialLeaseCostsRatioCommercial" value="2">
-                            </div>
-                             <div class="form-group">
-                                <label for="leaseTermCommercial">
-                                    租約年期
-                                     <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">一般店鋪租約為2-5年，較長的租約能提供更穩定的現金流，但也會犧牲價格彈性。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="leaseTermCommercial" value="3">
-                            </div>
-                            <div class="form-group">
-                                <label for="annualAppreciation">
-                                    不動產年均增值率 (%)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為相對保守的預估參考值，實際增值率高度依賴地點與市場狀況。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="annualAppreciation" value="0.5" step="0.1">
-                            </div>
-                             <div class="form-group">
-                                <label for="investmentPeriod">投資持有年限</label>
-                                <input type="number" id="investmentPeriod" value="10" min="1">
-                            </div>
-                            <div class="form-group">
-                                <label for="annualInsuranceCost">
-                                    年均火災・地震保險料 (万円)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為重要的持有成本，通常在申請貸款時必須加入。費用會因建物結構、地區、保額而異。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="annualInsuranceCost" value="2">
-                            </div>
-                            <div class="form-group corporate-param hidden">
-                                <label for="annualTaxAccountantFee">
-                                    年均稅理士顧問費用 (万円)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">以法人身份營運時，處理帳務與稅務申報所需的專業費用。</span>
-                                    </div>
-                                </label>
-                                <input type="text" inputmode="decimal" id="annualTaxAccountantFee" value="20">
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <h3>1.3 長期持有參數</h3>
-                    <div class="grid-container">
-                        <div class="form-group">
-                            <label for="managementFeeRatio">
-                                物業管理與修繕金比例 (%)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext" id="managementFeeTooltip">此建議值會根據房產類型自動調整。塔樓因公設多，管理費高；一戶建則需考量自主維護成本。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="managementFeeRatio" value="8" step="0.1">
-                        </div>
-                        <div class="form-group">
-                            <label for="propertyTaxRate">
-                                固定資產稅與都市計畫稅率 (%)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">此為根據日本市場實務的建議值。包含固定資產稅(標準1.4%)與都市計畫稅(標準0.3%)。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="propertyTaxRate" value="1.7" step="0.01">
-                        </div>
-                        <div class="form-group">
-                            <label for="annualAppreciation">
-                                不動產年均增值率 (%)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">此為相對保守的預估參考值，實際增值率高度依賴地點與市場狀況。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="annualAppreciation" value="0.5" step="0.1">
-                        </div>
-                         <div class="form-group">
-                            <label for="investmentPeriod">投資持有年限</label>
-                            <input type="number" id="investmentPeriod" value="10" min="1">
-                        </div>
-                        <div class="form-group">
-                            <label for="annualInsuranceCost">
-                                年均火災・地震保險料 (万円)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">此為重要的持有成本，通常在申請貸款時必須加入。費用會因建物結構、地區、保額而異。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="annualInsuranceCost" value="2">
-                        </div>
-                        <div class="form-group corporate-param hidden">
-                            <label for="annualTaxAccountantFee">
-                                年均稅理士顧問費用 (万円)
-                                <div class="tooltip">
-                                    <span class="expert-marker">★</span>
-                                    <span class="tooltiptext">以法人身份營運時，處理帳務與稅務申報所需的專業費用。</span>
-                                </div>
-                            </label>
-                            <input type="number" id="annualTaxAccountantFee" value="20">
-                        </div>
-                    </div>
-
-                    <div id="taxParams" class="corporate-param hidden">
-                        <h3>1.4 稅務參數 (法人適用)</h3>
-                        <div class="grid-container">
-                            <div class="form-group">
-                                <label for="buildingStructure">
-                                    建物結構 (影響折舊年限)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext" id="buildingStructureTooltip">此建議值會根據房產類型自動調整。RC造耐用年限47年，木造為22年，直接影響稅務折舊金額。</span>
-                                    </div>
-                                </label>
-                                <select id="buildingStructure">
-                                    <option value="wood">木造 (耐用年数22年)</option>
-                                    <option value="rc" selected>RC/SRC造 (耐用年数47年)</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="buildingRatio">
-                                    建物佔房價比例 (%)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext" id="buildingRatioTooltip">此建議值會根據房產類型自動調整。塔樓建物價值高，佔比高；一戶建土地價值高，佔比較低。此比例是計算折舊的基礎。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="buildingRatio" value="60">
-                            </div>
-                            <div class="form-group">
-                                <label for="corporateTaxRate">
-                                    法人綜合實效稅率 (%)
-                                    <div class="tooltip">
-                                        <span class="expert-marker">★</span>
-                                        <span class="tooltiptext">此為根據日本市場實務的建議值，適用於課稅所得800万円以下的中小企業。</span>
-                                    </div>
-                                </label>
-                                <input type="number" id="corporateTaxRate" value="23.2">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="btn-group">
-                        <button type="button" class="btn" id="calculateBtn">生成分析報告</button>
-                    </div>
-                </div>
-            </form>
-
-            <div id="resultsContainer" class="hidden">
-                <div class="section" id="financialAnalysis">
-                    <h2>第二章：財務分析總覽</h2>
-                    <div class="summary-card">
-                        <h3>投資回報總覽</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>關鍵績效指標 (KPI)</th>
-                                    <th>數值</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        現金回報率 (Cash-on-Cash Return)
-                                        <div class="tooltip">
-                                            <span class="info-icon">i</span>
-                                            <span class="tooltiptext">穩定營運年度的淨現金流 ÷ 總投資金額 × 100%<br>此指標衡量您投入的現金每年能產生多少回報，是評估現金流效率的核心指標。</span>
-                                        </div>
-                                    </td>
-                                    <td id="cashOnCashReturn" class="value-cell">-</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        內部報酬率 (IRR)
-                                        <div class="tooltip">
-                                            <span class="info-icon">i</span>
-                                            <span class="tooltiptext">綜合考慮投資期間所有現金流（包括年度淨現金流和最終出售時的資產淨值）後，使總投資淨現值為零的折現率。IRR是評估長期投資獲利能力的黃金標準。</span>
-                                        </div>
-                                    </td>
-                                    <td id="totalROI" class="value-cell">-</td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        投資回收期 (Payback Period)
-                                        <div class="tooltip">
-                                            <span class="info-icon">i</span>
-                                            <span class="tooltiptext">僅考慮營運現金流，回收初期總投資所需的時間。</span>
-                                        </div>
-                                    </td>
-                                    <td id="paybackPeriod" class="value-cell">-</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3>初始投資成本分析</h3>
-                     <table class="results-table">
-                         <thead>
-                             <tr>
-                                 <th>項目</th>
-                                 <th>金額 (万円)</th>
-                                 <th>金額 (萬台幣)</th>
-                             </tr>
-                         </thead>
-                         <tbody>
-                            <tr class="highlight-row">
-                                 <td>總投資金額 (現金支出)</td>
-                                 <td id="totalInvestmentJPY" class="value-cell">-</td>
-                                 <td id="totalInvestmentTWD" class="value-cell">-</td>
-                             </tr>
-                             <tr>
-                                 <td>&nbsp;&nbsp;├ 頭期款中的自備款</td>
-                                 <td id="downPaymentOwnCapitalJPY" class="value-cell">-</td>
-                                 <td id="downPaymentOwnCapitalTWD" class="value-cell">-</td>
-                             </tr>
-                             <tr>
-                                 <td>&nbsp;&nbsp;├ 初期雜項開銷</td>
-                                 <td id="acquisitionCostsJPY" class="value-cell">-</td>
-                                 <td id="acquisitionCostsTWD" class="value-cell">-</td>
-                             </tr>
-                              <tr>
-                                 <td>&nbsp;&nbsp;├ 家具家電及法人設立</td>
-                                 <td id="initialSetupCostsJPY" class="value-cell">-</td>
-                                 <td id="initialSetupCostsTWD" class="value-cell">-</td>
-                             </tr>
-                             <tr class="highlight-row">
-                                 <td>總融資金額</td>
-                                 <td id="totalLoanAmountJPY" class="value-cell">-</td>
-                                 <td id="totalLoanAmountTWD" class="value-cell">-</td>
-                             </tr>
-                             <tr>
-                                 <td>&nbsp;&nbsp;├ 房屋貸款</td>
-                                 <td id="loanAmountJPY" class="value-cell">-</td>
-                                 <td id="loanAmountTWD" class="value-cell">-</td>
-                             </tr>
-                             <tr>
-                                 <td>&nbsp;&nbsp;└ 頭期款信貸</td>
-                                 <td id="downPaymentCreditLoanJPY" class="value-cell">-</td>
-                                 <td id="downPaymentCreditLoanTWD" class="value-cell">-</td>
-                             </tr>
-                         </tbody>
-                     </table>
-                </div>
-
-                <div id="cash-flow-details" class="result-section">
-                    <h4>年度現金流分析</h4>
-                    <p class="analysis-note">
-                        <strong>※ 計算說明：</strong>首年一次性收入（如禮金、押金等）並未扣除投資額，而是作為第一年額外收入計算，
-                        以下現金流為穩定營運後的年度表現，並以台幣顯示便於理解。
+                    <h1 class="hero-title">
+                        <span class="title-line-1">日本不動產投資</span><br>
+                        <span class="highlight-text">專業分析平台</span>
+                    </h1>
+                    <p class="hero-description">
+                        運用先進的財務模型與市場數據，為您的日本不動產投資決策提供全方位的專業分析與洞察。
+                        從財務評估到風險分析，讓每一筆投資都建立在堅實的數據基礎上。
                     </p>
-                    <table class="results-table" id="cashFlowAnalysisTable">
-                        <thead>
-                            <tr class="header-row">
-                                <th>項目</th>
-                                <th>金額 (万円)</th>
-                                <th>金額 (萬台幣)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="cashFlowBreakdown">
-                            <!-- JS will populate this -->
-                        </tbody>
-                        <tfoot class="total-row">
-                            <tr>
-                                <td><strong>稅後淨現金流</strong></td>
-                                <td id="netCashFlow_stable_jpy" class="value-cell"></td>
-                                <td id="netCashFlow_stable_twd" class="value-cell"></td>
-                            </tr>
-                        </tfoot>
-                    </table>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary btn-lg" onclick="startAnalysis()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                            開始財務分析
+                        </button>
+                        <button class="btn btn-secondary btn-lg" onclick="scrollToFeatures()">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12,6 12,12 16,14"></polyline>
+                            </svg>
+                            了解更多
+                        </button>
+                    </div>
                 </div>
-
-                <div id="annual-projections" class="result-section">
-                    <h4>年度資產變化表</h4>
-                    <table class="results-table">
-                        <thead>
-                            <tr>
-                                <th>年度</th>
-                                <th>稅後現金流 (万円)</th>
-                                <th>預估房產價值 (万円)</th>
-                                <th>貸款餘額 (万円)</th>
-                                <th>淨資產價值 (万円)</th>
-                                <th>淨資產價值 (萬台幣)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="annualTableBody">
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="section hidden" id="expertSuggestions">
-                    <h2>第三章：專家綜合建議</h2>
-                    <div id="suggestionText" class="suggestion-box"></div>
+                <div class="hero-visual">
+                    <div class="dashboard-preview">
+                        <div class="preview-header">
+                            <div class="preview-tabs">
+                                <span class="tab active">財務分析</span>
+                                <span class="tab">風險評估</span>
+                                <span class="tab">投資報告</span>
+                            </div>
+                        </div>
+                        <div class="preview-content">
+                            <div class="metric-cards">
+                                <div class="metric-card">
+                                    <div class="metric-label">投資回報率</div>
+                                    <div class="metric-value positive">8.2%</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">現金流</div>
+                                    <div class="metric-value positive">¥125,000</div>
+                                </div>
+                                <div class="metric-card">
+                                    <div class="metric-label">風險評級</div>
+                                    <div class="metric-value neutral">中等</div>
+                                </div>
+                            </div>
+                            <div class="chart-placeholder">
+                                <svg viewBox="0 0 300 120" class="preview-chart">
+                                    <polyline points="20,100 60,80 100,60 140,40 180,45 220,30 260,25" 
+                                              fill="none" stroke="#D4AF37" stroke-width="3"/>
+                                    <circle cx="260" cy="25" r="4" fill="#D4AF37"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <div class="btn-group" style="padding-bottom: 40px;">
-                <button class="btn btn-download hidden" id="downloadBtn">下載完整報告 (PDF)</button>
+        <!-- Features Section -->
+        <section id="features" class="features-section">
+            <div class="section-container">
+                <div class="section-header">
+                    <h2 class="section-title">專業分析工具</h2>
+                    <p class="section-subtitle">全方位的投資分析解決方案</p>
+                </div>
+                
+                <div class="features-grid">
+                    <div class="feature-card" data-feature="financial">
+                        <div class="feature-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">財務分析</h3>
+                        <p class="feature-description">
+                            深度財務模型分析，包含現金流預測、投資回報率計算、風險評估等專業指標。
+                        </p>
+                        <button class="feature-cta" onclick="startAnalysis()">開始分析</button>
+                    </div>
+                    
+                    <div class="feature-card" data-feature="market">
+                        <div class="feature-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="22,12 18,12 15,21 9,3 6,12 2,12"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">市場洞察</h3>
+                        <p class="feature-description">
+                            即時市場數據分析，區域比較報告，助您掌握最佳投資時機與地點。
+                        </p>
+                        <button class="feature-cta coming-soon" disabled>即將推出</button>
+                    </div>
+                    
+                    <div class="feature-card" data-feature="portfolio">
+                        <div class="feature-icon">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="10,8 16,12 10,16"></polyline>
+                            </svg>
+                        </div>
+                        <h3 class="feature-title">投資組合</h3>
+                        <p class="feature-description">
+                            多物件投資組合管理，風險分散分析，投資組合優化建議。
+                        </p>
+                        <button class="feature-cta coming-soon" disabled>即將推出</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Analysis Tool Section -->
+        <section id="analysis" class="analysis-section hidden">
+            <div class="analysis-container">
+                <div class="analysis-header">
+                    <button class="back-btn" onclick="showSection('home')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 12H5M12 19l-7-7 7-7"></path>
+                        </svg>
+                        返回首頁
+                    </button>
+                    <div class="analysis-title-section">
+                        <h1 class="analysis-title">財務分析工具</h1>
+                        <p class="analysis-subtitle">專業的日本不動產投資財務分析</p>
+                    </div>
+                </div>
+
+                <!-- Analysis Form -->
+                <div class="report-container" id="reportToPrint">
+                    <div class="report-body">
+                        <form id="property-form">
+                            <div class="section" id="parameters">
+                                <h2>基本參數設定</h2>
+                                <div class="grid-container">
+                                    <div class="form-group">
+                                        <label for="purchaseType">購買身份</label>
+                                        <select id="purchaseType">
+                                            <option value="personal">個人身份</option>
+                                            <option value="corporate" selected>設立法人</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="monetizationModel">
+                                            變現模式
+                                             <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">選擇不同的變現模式，將會完全改變營運參數的設定與營收的計算方式。</span>
+                                            </div>
+                                        </label>
+                                        <select id="monetizationModel">
+                                            <option value="airbnb" selected>Airbnb 短租</option>
+                                            <option value="personalLease">個人長租</option>
+                                            <option value="commercialLease">店鋪出租</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="propertyType">
+                                            房產類型
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">選擇不同房型將自動更新房價、租金、建物結構及相關成本的專家建議值，以反映市場實況。</span>
+                                            </div>
+                                        </label>
+                                        <select id="propertyType">
+                                            <option value="1LDK" selected>1LDK</option>
+                                            <option value="2LDK">2LDK</option>
+                                            <option value="tower">塔樓</option>
+                                            <option value="house">一戶建</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">
+                                            房產位置 (東京23區)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">選擇不同區域將連動更新房價與租金等專家建議值。目前模型以東京23區為基礎。</span>
+                                            </div>
+                                        </label>
+                                        <select id="location">
+                                            <optgroup label="都心5區 (Tier 1 - 高價區)">
+                                                <option value="Minato">港區</option>
+                                                <option value="Chiyoda">千代田區</option>
+                                                <option value="Chuo">中央區</option>
+                                                <option value="Shibuya">澀谷區</option>
+                                                <option value="Shinjuku">新宿區</option>
+                                            </optgroup>
+                                            <optgroup label="人氣職住區 (Tier 2 - 中高價區)">
+                                                <option value="Meguro">目黑區</option>
+                                                <option value="Setagaya">世田谷區</option>
+                                                <option value="Shinagawa">品川區</option>
+                                                <option value="Bunkyo">文京區</option>
+                                                <option value="Taito">台東區</option>
+                                                <option value="Toshima">豐島區</option>
+                                            </optgroup>
+                                            <optgroup label="標準住宅區 (Tier 3 - 標準區)">
+                                                <option value="Koto" selected>江東區</option>
+                                                <option value="Ota">大田區</option>
+                                                <option value="Suginami">杉並區</option>
+                                                <option value="Nakano">中野區</option>
+                                                <option value="Arakawa">荒川區</option>
+                                                <option value="Sumida">墨田區</option>
+                                                <option value="Itabashi">板橋區</option>
+                                                <option value="Nerima">練馬區</option>
+                                                <option value="Kita">北區</option>
+                                            </optgroup>
+                                            <optgroup label="東部/北部區 (Tier 4 - 實惠區)">
+                                                <option value="Adachi">足立區</option>
+                                                <option value="Katsushika">葛飾區</option>
+                                                <option value="Edogawa">江戶川區</option>
+                                            </optgroup>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="loanOrigin">貸款來源</label>
+                                        <select id="loanOrigin">
+                                            <option value="japan">日本貸款</option>
+                                            <option value="taiwan">台灣貸款</option>
+                                            <option value="mixed">台灣信貸(頭期款) + 日本貸款</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <h3>房產與財務參數</h3>
+                                <div class="grid-container">
+                                    <div class="form-group">
+                                        <label for="propertyPrice">房產價格 (万円)</label>
+                                        <input type="text" inputmode="decimal" id="propertyPrice" value="3000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="downPaymentRatio">頭期款比例 (%)</label>
+                                        <input type="number" id="downPaymentRatio" value="20" min="0" max="100">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="acquisitionCostRatio">
+                                            初期購屋總成本比例 (%)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">包含仲介費、代書費、稅金等，佔房價的比例依物件價格而異。高價物件(如5000萬日幣以上)佔比較低，約6-8%；中低價物件佔比較高，約8-10%。8%為一綜合估算值。</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="acquisitionCostRatio" value="8" step="0.1">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="exchangeRate">匯率 (JPY/TWD)</label>
+                                        <input type="number" id="exchangeRate" value="0.22" step="0.001">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="investmentPeriod">
+                                            投資期間 (年)
+                                            <div class="tooltip">
+                                                <span class="info-icon">i</span>
+                                                <span class="tooltiptext">分析投資的持有期間，通常建議5-10年以獲得較佳的投資回報。</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="investmentPeriod" value="10" min="1" max="30">
+                                    </div>
+                                </div>
+
+                                <!-- 貸款參數 -->
+                                <h3>貸款參數</h3>
+                                <div class="grid-container">
+                                    <div class="form-group loan-param" data-loan-type="japan mixed">
+                                        <label for="japanLoanInterestRate">日本房貸利率 (%)</label>
+                                        <input type="number" id="japanLoanInterestRate" value="1.5" step="0.1" min="0" max="10">
+                                    </div>
+                                    <div class="form-group loan-param" data-loan-type="japan mixed">
+                                        <label for="japanLoanTerm">日本房貸年限</label>
+                                        <input type="number" id="japanLoanTerm" value="35" min="1" max="50">
+                                    </div>
+                                    <div class="form-group loan-param" data-loan-type="taiwan mixed">
+                                        <label for="taiwanLoanInterestRate">台灣房貸利率 (%)</label>
+                                        <input type="number" id="taiwanLoanInterestRate" value="2.5" step="0.1" min="0" max="10">
+                                    </div>
+                                    <div class="form-group loan-param" data-loan-type="taiwan mixed">
+                                        <label for="taiwanLoanTerm">台灣房貸年限</label>
+                                        <input type="number" id="taiwanLoanTerm" value="30" min="1" max="40">
+                                    </div>
+                                    <div class="form-group loan-param" data-loan-type="mixed">
+                                        <label for="ownCapitalAmount">自有資金 (萬台幣)</label>
+                                        <input type="number" id="ownCapitalAmount" value="300" min="0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="creditLoanRate">信貸利率 (%)</label>
+                                        <input type="number" id="creditLoanRate" value="8.5" step="0.1" min="0" max="20">
+                                    </div>
+                                </div>
+
+                                <!-- 營運參數 -->
+                                <h3>營運參數</h3>
+                                
+                                <!-- Airbnb 參數 -->
+                                <div id="airbnbParams" class="monetization-params">
+                                    <div class="grid-container">
+                                        <div class="form-group">
+                                            <label for="operatingDaysCap">
+                                                合法經營天數上限
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">依合法天數上限 (除合法天數外)，通常為365天</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="operatingDaysCap" value="180" min="1" max="365">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="occupancyRate">
+                                                預期入住率 (除合法天數外)(%)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">入住率會根據地點、房型和管理品質而異</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="occupancyRate" value="80" min="0" max="100">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="dailyRate">
+                                                預期每日平均租金 (ADR) (日幣)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">平均日租金會根據房型、地點自動調整建議值</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="dailyRate" value="18000" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="platformFeeRate">
+                                                平台服務費率 (%)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">Airbnb 等平台收取的服務費，通常為3%</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="platformFeeRate" value="15" step="0.1" min="0" max="20">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="cleaningFee">
+                                                每次入住清潔費 (万円)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">每次客人退房後的清潔費用</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="cleaningFee" value="0.5" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="avgStayDuration">平均入住天數</label>
+                                            <input type="number" id="avgStayDuration" value="4" min="1" max="30">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="avgGuests">最大收容人數
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">會根據房型自動調整</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="avgGuests" value="4" min="1" max="20">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="baseOccupancyForFee">追加費用起算人數</label>
+                                            <input type="number" id="baseOccupancyForFee" value="2" min="1" max="10">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="extraGuestFee">每人每晚追加費用 (万円)</label>
+                                            <input type="number" id="extraGuestFee" value="0.2" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="peakSeasonMarkup">
+                                                旺季加成比例 (%)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">旺季期間(如櫻花季、年末年初)的價格加成</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="peakSeasonMarkup" value="15" min="0" max="100">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="monthlyUtilities">
+                                                每月水電瓦斯網路費 (万円)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">包含水電瓦斯、網路等基本費用，會根據房型調整</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="monthlyUtilities" value="2.5" step="0.1" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 個人長租參數 -->
+                                <div id="personalLeaseParams" class="monetization-params hidden">
+                                    <div class="grid-container">
+                                        <div class="form-group">
+                                            <label for="monthlyRent">月租金 (万円)</label>
+                                            <input type="number" id="monthlyRent" value="12" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vacancyRate">空置率 (%)</label>
+                                            <input type="number" id="vacancyRate" value="5" step="0.1" min="0" max="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="initialLeaseCostsRatio">初期費用 (月數)</label>
+                                            <input type="number" id="initialLeaseCostsRatio" value="3" min="0" max="12">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="leaseUtilities">房東負擔水電費 (万円/月)</label>
+                                            <input type="number" id="leaseUtilities" value="0.5" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="leaseRenewalFeeFrequency">更新費收取頻率 (年)</label>
+                                            <input type="number" id="leaseRenewalFeeFrequency" value="2" min="1" max="5">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="leaseRenewalFeeAmount">更新費金額 (月數)</label>
+                                            <input type="number" id="leaseRenewalFeeAmount" value="1" step="0.1" min="0" max="3">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 商業租賃參數 -->
+                                <div id="commercialLeaseParams" class="monetization-params hidden">
+                                    <div class="grid-container">
+                                        <div class="form-group">
+                                            <label for="monthlyRentCommercial">月租金 (万円)</label>
+                                            <input type="number" id="monthlyRentCommercial" value="15" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="vacancyRateCommercial">空置率 (%)</label>
+                                            <input type="number" id="vacancyRateCommercial" value="10" step="0.1" min="0" max="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="initialLeaseCostsRatioCommercial">初期費用 (月數)</label>
+                                            <input type="number" id="initialLeaseCostsRatioCommercial" value="6" min="0" max="12">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- 長期持有參數 -->
+                                <h3>長期持有參數</h3>
+                                <div class="grid-container">
+                                    <div class="form-group">
+                                        <label for="managementFeeRatio">
+                                            物業管理與修繕金比例 (%)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext" id="managementFeeTooltip">此建議值會根據房產類型自動調整。</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="managementFeeRatio" value="12.5" step="0.1" min="0" max="30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="propertyTaxRate">
+                                            固定資產稅與都市計畫稅率 (%)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">固定資產稅1.4% + 都市計畫稅0.3% = 1.7%為標準稅率</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="propertyTaxRate" value="1.7" step="0.1" min="0" max="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="annualAppreciation">
+                                            不動產年均增值率 (%)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">日本不動產長期年均增值約0.5-1%，保守估計</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="annualAppreciation" value="0.5" step="0.1" min="-5" max="10">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="annualInsuranceCost">
+                                            年均火災・地震保險料 (万円)
+                                            <div class="tooltip">
+                                                <span class="expert-marker">★</span>
+                                                <span class="tooltiptext">包含火災保險與地震保險，依房產價值而定</span>
+                                            </div>
+                                        </label>
+                                        <input type="number" id="annualInsuranceCost" value="2" step="0.1" min="0">
+                                    </div>
+                                </div>
+
+                                <!-- 稅務參數 (法人適用) -->
+                                <div class="corporate-param">
+                                    <h3>稅務參數 (法人適用)</h3>
+                                    <div class="grid-container">
+                                        <div class="form-group">
+                                            <label for="buildingStructure">
+                                                建物結構 (影響折舊年限)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext" id="buildingStructureTooltip">會根據房產類型自動調整建議值。</span>
+                                                </div>
+                                            </label>
+                                            <select id="buildingStructure">
+                                                <option value="rc">RC/SRC造 (耐用年數47年)</option>
+                                                <option value="wood">木造 (耐用年數22年)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="buildingRatio">
+                                                建物佔價值比例 (%)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext" id="buildingRatioTooltip">會根據房產類型自動調整建議值。</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="buildingRatio" value="65" min="0" max="100">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="corporateTaxRate">
+                                                法人綜合實效稅率 (%)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">包含法人稅、地方法人稅、住民稅等綜合稅率</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="corporateTaxRate" value="23.2" step="0.1" min="0" max="50">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="corporateSetupCost">
+                                                法人設立費用 (万円)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">包含登記費、司法書士費用等</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="corporateSetupCost" value="25" step="0.1" min="0">
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="annualTaxAccountantFee">
+                                                年均稅理士顧問費 (万円)
+                                                <div class="tooltip">
+                                                    <span class="expert-marker">★</span>
+                                                    <span class="tooltiptext">法人稅務申報與會計處理費用</span>
+                                                </div>
+                                            </label>
+                                            <input type="number" id="annualTaxAccountantFee" value="20" step="0.1" min="0">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary" id="calculateBtn">生成分析報告</button>
+                                    <!-- 中段下載按鈕已隱藏，不再顯示 -->
+                                </div>
+                            </div>
+                        </form>
+
+                        <!-- Results Container -->
+                        <div id="resultsContainer" class="hidden">
+                        <div id="reportToPrint">
+                            <!-- Analysis Mode Selection -->
+                            <div class="analysis-mode-section">
+                                <div class="section-header">
+                                    <h2>📊 選擇分析模式</h2>
+                                    <p>請選擇適合您投資經驗的分析模式，系統將提供對應的指標和建議</p>
+                                    <button class="btn btn-secondary" id="toggleModeBtn">指標調整</button>
+                                </div>
+                                
+                                <div class="mode-selection">
+                                    <div class="mode-card basic-mode active" id="basicMode">
+                                        <div class="mode-icon">📈</div>
+                                        <div class="mode-content">
+                                            <h3>基本投資人版</h3>
+                                            <p>核心指標，簡潔易懂</p>
+                                        </div>
+                                    </div>
+                                    <div class="mode-card professional-mode" id="professionalMode">
+                                        <div class="mode-icon">🎯</div>
+                                        <div class="mode-content">
+                                            <h3>專業投資人版</h3>
+                                            <p>進階槓桿分析，深度評估</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Professional Analysis Section -->
+                            <div class="professional-analysis hidden" id="professionalAnalysis">
+                                <div class="section-header">
+                                    <h2>🎯 進階槓桿分析 (專業版)</h2>
+                                </div>
+                                
+                                <div class="advanced-metrics-table">
+                                    <table class="financial-table">
+                                        <thead>
+                                            <tr>
+                                                <th>進階指標</th>
+                                                <th>數值</th>
+                                                <th>健康標準</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    債務償付覆蓋率 (DSCR)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">衡量物件現金流覆蓋債務償付能力的指標</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="dscr">-</td>
+                                                <td class="health-standard">
+                                                    ≥ 1.30 健康<br>
+                                                    1.15-1.29 警告<br>
+                                                    < 1.15 危險
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    槓桿倍數 (Leverage Ratio)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">總債務與總資產的比例</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="leverageRatio">-</td>
+                                                <td class="health-standard">
+                                                    ≤ 3.0 保守<br>
+                                                    3.0-5.0 適中<br>
+                                                    > 5.0 激進
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    槓桿後 ROE (Leveraged ROE)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">使用槓桿後的自有資金報酬率</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="leveragedROE">-</td>
+                                                <td class="health-standard">
+                                                    ≥ 8% 優秀<br>
+                                                    5-8% 良好<br>
+                                                    < 5% 需評估
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    年度債務服務 (Annual Debt Service)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">每年需支付的債務本息總額</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="annualDebtService">-</td>
+                                                <td class="health-standard">
+                                                    應 < 年收入 80%
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    年度淨營運收入 (NOI)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">扣除營運費用後的年度收入</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="noi">-</td>
+                                                <td class="health-standard">
+                                                    應 > 債務服務 125%
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    投資回收期 (Payback Period)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">收回初始投資所需的時間</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="paybackPeriodPro">-</td>
+                                                <td class="health-standard">
+                                                    ≤ 7年 優秀<br>
+                                                    7-10年 良好<br>
+                                                    > 10年 需評估
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Basic Analysis Section -->
+                            <div class="basic-analysis" id="basicAnalysis">
+                                <div class="section-header">
+                                    <h2>📈 核心投資指標 (基本版)</h2>
+                                </div>
+                                
+                                <div class="basic-metrics-table">
+                                    <table class="financial-table">
+                                        <thead>
+                                            <tr>
+                                                <th>關鍵績效指標</th>
+                                                <th>數值</th>
+                                                <th>健康標準</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    現金回報率 (CoCR)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">年度現金流與初始投資的比例</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="cashOnCashReturn">-</td>
+                                                <td class="health-standard">
+                                                    ≥ 5% 優秀<br>
+                                                    3-5% 良好<br>
+                                                    < 3% 需改善
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    債務覆蓋率 (DCR)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">營運收入覆蓋債務償付的能力</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="debtCoverageRatio">-</td>
+                                                <td class="health-standard">
+                                                    ≥ 1.25 安全<br>
+                                                    1.10-1.24 警告<br>
+                                                    < 1.10 危險
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    貸款價值比 (LTV)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">貸款金額與房產價值的比例</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="loanToValue">-</td>
+                                                <td class="health-standard">
+                                                    ≤ 75% 保守<br>
+                                                    75-85% 適中<br>
+                                                    > 85% 激進
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    內部報酬率 (IRR)
+                                                    <div class="tooltip">
+                                                        <span class="info-icon">i</span>
+                                                        <span class="tooltiptext">投資期間的年化報酬率</span>
+                                                    </div>
+                                                </td>
+                                                <td class="metric-value" id="totalROI">-</td>
+                                                <td class="health-standard">
+                                                    ≥ 8% 優秀<br>
+                                                    5-8% 良好<br>
+                                                    < 5% 需評估
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Initial Investment Analysis -->
+                            <div class="initial-investment-section">
+                                <h2>初始投資成本分析</h2>
+                                <div class="investment-breakdown-table">
+                                    <table class="financial-table">
+                                        <thead>
+                                            <tr>
+                                                <th>項目</th>
+                                                <th>金額 (萬円)</th>
+                                                <th>金額 (萬台幣)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="initialInvestmentTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Annual Cash Flow Analysis -->
+                            <div class="cash-flow-section">
+                                <h2>年度現金流分析</h2>
+                                <div class="cash-flow-notice">
+                                    <p><strong>※ 計算說明：</strong> 首年一次性收入（如禮金、押金等）並未扣除投資額，而是作為第一年額外收入計算，以下現金流為穩定營運後的年度表現，並以台幣顯示便於理解。</p>
+                                </div>
+                                
+                                <div class="cash-flow-breakdown-table">
+                                    <table class="financial-table">
+                                        <thead>
+                                            <tr>
+                                                <th>項目</th>
+                                                <th>金額 (萬円)</th>
+                                                <th>金額 (萬台幣)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="cashFlowBreakdownTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Annual Asset Changes -->
+                            <div class="asset-changes-section">
+                                <h2>年度資產變化表</h2>
+                                <div class="asset-changes-table">
+                                    <table class="financial-table">
+                                        <thead>
+                                            <tr>
+                                                <th>年度</th>
+                                                <th>稅後現金流 (萬円)</th>
+                                                <th>預估房產價值 (萬円)</th>
+                                                <th>貸款餘額 (萬円)</th>
+                                                <th>淨資產價值 (萬円)</th>
+                                                <th>淨資產價值 (萬台幣)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="assetChangesTable">
+                                            <!-- Will be populated by JavaScript -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="download-section">
+                                    <button type="button" class="btn btn-download" id="downloadPdfBtn">下載完整報告 (PDF)</button>
+                                </div>
+                            </div>
+                        </div> <!-- 結束 reportToPrint -->
+
+                            <!-- Google Login Section -->
+                            <div class="login-section" id="loginSection">
+                                <h3>儲存分析結果</h3>
+                                <p>登入 Google 帳戶以儲存您的分析結果，並建立個人投資組合。</p>
+                                <button type="button" class="btn btn-secondary google-login-btn" id="googleLoginBtn">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                                    </svg>
+                                    使用 Google 帳戶登入
+                                </button>
+                                <div id="userInfo" class="user-info hidden">
+                                    <div class="user-avatar">
+                                        <img id="userAvatar" src="" alt="用戶頭像">
+                                    </div>
+                                    <div class="user-details">
+                                        <div class="user-name" id="userName"></div>
+                                        <div class="user-email" id="userEmail"></div>
+                                    </div>
+                                    <button type="button" class="btn btn-secondary" id="logoutBtn">登出</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about-section">
+            <div class="section-container">
+                <div class="about-content">
+                    <div class="about-text">
+                        <h2 class="section-title">關於 NIPPON PROPERTY ANALYTICS</h2>
+                        <p class="about-description">
+                            我們是專注於日本不動產投資分析的專業平台，致力於為投資者提供最準確、最全面的投資決策支援。
+                            運用先進的財務模型與豐富的市場數據，讓每一筆投資都建立在堅實的分析基礎上。
+                        </p>
+                        <div class="about-features">
+                            <div class="about-feature">
+                                <div class="feature-number">01</div>
+                                <div class="feature-content">
+                                    <h4>專業分析模型</h4>
+                                    <p>運用業界領先的財務分析模型，提供精準的投資評估</p>
+                                </div>
+                            </div>
+                            <div class="about-feature">
+                                <div class="feature-number">02</div>
+                                <div class="feature-content">
+                                    <h4>即時市場數據</h4>
+                                    <p>整合多元數據源，確保分析結果反映最新市場狀況</p>
+                                </div>
+                            </div>
+                            <div class="about-feature">
+                                <div class="feature-number">03</div>
+                                <div class="feature-content">
+                                    <h4>風險評估</h4>
+                                    <p>全方位風險分析，幫助您做出更明智的投資決策</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="about-visual">
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number">1000+</div>
+                                <div class="stat-label">分析案例</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">95%</div>
+                                <div class="stat-label">準確率</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">24/7</div>
+                                <div class="stat-label">服務支援</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="{{ url_for('static', filename='images/logo.svg') }}" alt="NIPPON PROPERTY ANALYTICS" class="footer-logo">
+                    <p class="footer-tagline">Professional Investment Intelligence</p>
+                </div>
+                <div class="footer-links">
+                    <div class="link-group">
+                        <h4>服務項目</h4>
+                        <a href="#analysis">財務分析</a>
+                        <a href="#market">市場洞察</a>
+                        <a href="#portfolio">投資組合</a>
+                    </div>
+                    <div class="link-group">
+                        <h4>關於我們</h4>
+                        <a href="#about">公司介紹</a>
+                        <a href="#contact">聯絡我們</a>
+                        <a href="#privacy">隱私政策</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 NIPPON PROPERTY ANALYTICS. All rights reserved. Version {{ version }}</p>
             </div>
         </div>
-    </div>
-
-    <footer class="footer">
-        <p>&copy; 2024 日本不動產投資分析. All Rights Reserved. (Ver: {{ version }})</p>
     </footer>
-    
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='js/google-auth.js') }}?v={{ version }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}?v={{ version }}"></script>
 </body>
 </html> 

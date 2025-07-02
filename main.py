@@ -47,6 +47,46 @@ def index():
                          ga_tracking_id=GA_TRACKING_ID,
                          environment=ENVIRONMENT)
 
+@app.route('/analysis')
+@rate_limit(max_requests=30)
+def analysis():
+    app.logger.info(f"財務分析頁面訪問 - 環境: {ENVIRONMENT}")
+    
+    return render_template('index.html', 
+                         version=VERSION,
+                         ga_tracking_id=GA_TRACKING_ID,
+                         environment=ENVIRONMENT)
+
+@app.route('/market')
+@rate_limit(max_requests=30)
+def market():
+    app.logger.info(f"市場洞察頁面訪問 - 環境: {ENVIRONMENT}")
+    
+    return render_template('index.html', 
+                         version=VERSION,
+                         ga_tracking_id=GA_TRACKING_ID,
+                         environment=ENVIRONMENT)
+
+@app.route('/portfolio')
+@rate_limit(max_requests=30)
+def portfolio():
+    app.logger.info(f"投資組合頁面訪問 - 環境: {ENVIRONMENT}")
+    
+    return render_template('index.html', 
+                         version=VERSION,
+                         ga_tracking_id=GA_TRACKING_ID,
+                         environment=ENVIRONMENT)
+
+@app.route('/about')
+@rate_limit(max_requests=30)
+def about():
+    app.logger.info(f"關於我們頁面訪問 - 環境: {ENVIRONMENT}")
+    
+    return render_template('index.html', 
+                         version=VERSION,
+                         ga_tracking_id=GA_TRACKING_ID,
+                         environment=ENVIRONMENT)
+
 @app.route('/version')
 def version():
     """API 端點：返回應用程式版本資訊"""
@@ -169,8 +209,7 @@ def calculate():
         peak_season_markup = safe_float(params.get('peakSeasonMarkup')) / 100
         monthly_utilities = safe_float(params.get('monthlyUtilities')) * MAN_EN
 
-        # 修正：operating_days_cap 應該是年度可營業天數上限，通常為365天
-        # 實際入住天數 = min(年度天數, 營業天數上限) * 入住率
+        # 計算實際收入
         max_possible_nights = min(365, operating_days_cap)
         annual_booked_nights = max_possible_nights * occupancy_rate
         monthly_booked_nights = annual_booked_nights / 12
@@ -188,7 +227,7 @@ def calculate():
             vacancy_rate = safe_float(params.get('vacancyRate')) / 100
             initial_ratio = safe_float(params.get('initialLeaseCostsRatio'))
             lease_utilities = safe_float(params.get('leaseUtilities')) * MAN_EN
-            lease_renewal_fee_frequency = safe_float(params.get('leaseRenewalFeeFrequency'), 2)
+            lease_renewal_fee_frequency = safe_float(params.get('leaseRenewalFeeFrequency'))
             lease_renewal_fee_amount = safe_float(params.get('leaseRenewalFeeAmount'))
             if lease_renewal_fee_frequency > 0 and lease_renewal_fee_amount > 0:
                  annual_renewal_fee = (monthly_rent * lease_renewal_fee_amount) / lease_renewal_fee_frequency
@@ -229,6 +268,10 @@ def calculate():
     annual_depreciation = (property_price * building_ratio) / (22 if building_structure == 'wood' else 47)
     annual_tax_y1 = 0
     annual_tax_y2 = 0
+    
+    # 追蹤實際利息支付
+    actual_interest_y1 = 0
+    actual_interest_y2 = 0
 
     for year in range(1, investment_period + 1):
         lease_renewal_fee_frequency = safe_float(params.get('leaseRenewalFeeFrequency'), 2)
@@ -240,8 +283,9 @@ def calculate():
         annual_operating_expenses = monthly_operating_expenses * 12
         annual_ebitda = annual_gross_income - annual_operating_expenses
         
-        # 計算實際支付的貸款利息
+        # 計算實際支付的貸款利息和本金
         annual_interest_paid = 0
+        annual_principal_paid = 0
         annual_credit_interest_paid = 0
         year_start_loan_balance = remaining_loan
 
@@ -250,12 +294,14 @@ def calculate():
                 if remaining_loan <= 0:
                     break
                 interest = remaining_loan * (loan_interest_rate / 12)
-                annual_interest_paid += interest
                 principal = monthly_payment - interest
+                annual_interest_paid += interest
+                annual_principal_paid += principal
                 remaining_loan = max(0, remaining_loan - principal)
 
-        # 正確計算稅前現金流：EBITDA - 實際利息支出 - 管理費等其他費用
-        pre_tax_cash_flow = annual_ebitda - annual_interest_paid - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee
+        # 正確計算稅前現金流：EBITDA - 實際債務服務（本息攤還）- 管理費等其他費用
+        annual_debt_service_actual = annual_interest_paid + annual_principal_paid + (credit_loan_payment * 12)
+        pre_tax_cash_flow = annual_ebitda - annual_debt_service_actual - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee
         post_tax_annual_cash_flow = pre_tax_cash_flow
 
         if purchase_type == 'corporate':
@@ -269,6 +315,12 @@ def calculate():
             if year == 2:
                 annual_tax_y2 = annual_tax
             post_tax_annual_cash_flow -= annual_tax
+        
+        # 記錄實際利息支付
+        if year == 1:
+            actual_interest_y1 = annual_interest_paid
+        if year == 2:
+            actual_interest_y2 = annual_interest_paid
 
         if year == investment_period:
             current_property_value = property_price * ((1 + annual_appreciation) ** year)
@@ -350,11 +402,31 @@ def calculate():
             "net_equity_twd": (net_equity / MAN_EN) * exchange_rate  # 轉換為萬台幣
         })
 
+    # 計算額外的 KPI 指標
+    loan_to_value = (loan_amount / property_price) * 100 if property_price > 0 else 0
+    annual_debt_service = monthly_payment * 12 + (credit_loan_payment * 12)
+    
+    # 正確計算 NOI：總租金收入 - 營運費用（不包括貸款本息、折舊、稅金）
+    annual_noi = (monthly_gross_revenue * 12) - (monthly_operating_expenses * 12) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost
+    noi = annual_noi
+    debt_coverage_ratio = noi / annual_debt_service if annual_debt_service > 0 else 0
+    dscr = debt_coverage_ratio  # 同樣的指標，不同名稱
+    # 修正槓桿比率：使用貸款價值比 (LTV) 作為槓桿指標
+    leverage_ratio = loan_to_value / 100  # LTV 已經是百分比，轉換為小數
+    leveraged_roe = cash_on_cash_return  # 槓桿後 ROE 與現金回報率相同
+
     results = {
         "kpi": {
             "cash_on_cash_return": cash_on_cash_return,
             "irr": irr * 100 if irr else 0,  # 轉換為百分比
-            "payback_period": payback_period
+            "payback_period": payback_period,
+            "loan_to_value": loan_to_value,
+            "debt_coverage_ratio": debt_coverage_ratio,
+            "dscr": dscr,
+            "leverage_ratio": leverage_ratio,
+            "leveraged_roe": leveraged_roe,
+            "annual_debt_service": annual_debt_service / MAN_EN,
+            "noi": noi / MAN_EN
         },
         "initial_investment": {
             "total_investment_jpy": total_initial_investment / MAN_EN,
@@ -379,23 +451,33 @@ def calculate():
             "ebitda_y1": ((monthly_gross_revenue * 12 + one_time_initial_income) - monthly_operating_expenses * 12) / MAN_EN,
             "ebitda_y2": (monthly_gross_revenue * 12 - monthly_operating_expenses * 12) / MAN_EN,
             "depreciation": annual_depreciation / MAN_EN,
-            "interest_payment_y1": (loan_interest_rate * loan_amount if loan_amount > 0 else 0) / MAN_EN,
-            "interest_payment_y2": (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) / MAN_EN,
-            "ebt_y1": (((monthly_gross_revenue * 12 + one_time_initial_income) - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * loan_amount if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN,
-            "ebt_y2": ((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN,
+            "interest_payment_y1": actual_interest_y1 / MAN_EN,
+            "interest_payment_y2": actual_interest_y2 / MAN_EN,
+            "ebt_y1": (((monthly_gross_revenue * 12 + one_time_initial_income) - monthly_operating_expenses * 12) - annual_depreciation - actual_interest_y1 - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN,
+            "ebt_y2": ((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - actual_interest_y2 - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN,
             "tax_y1": annual_tax_y1 / MAN_EN,
             "tax_y2": annual_tax_y2 / MAN_EN,
             "net_cash_flow_y1": cash_flows[1] / MAN_EN if len(cash_flows) > 1 else 0,
             "net_cash_flow_y2": cash_flows[2] / MAN_EN if len(cash_flows) > 2 else (cash_flows[1] / MAN_EN if len(cash_flows) > 1 else 0),
             
-            # 新增台幣換算的穩定年度現金流（用於新的表格格式）
+            # 新增穩定年度現金流（日幣和台幣）
+            "total_revenue_stable_jpy": (monthly_gross_revenue * 12) / MAN_EN,
             "total_revenue_stable_twd": ((monthly_gross_revenue * 12) / MAN_EN) * exchange_rate,
+            "total_expenses_stable_jpy": (monthly_operating_expenses * 12) / MAN_EN,
             "total_expenses_stable_twd": ((monthly_operating_expenses * 12) / MAN_EN) * exchange_rate,
+            "ebitda_stable_jpy": ((monthly_gross_revenue * 12) - (monthly_operating_expenses * 12)) / MAN_EN,
             "ebitda_stable_twd": (((monthly_gross_revenue * 12) - (monthly_operating_expenses * 12)) / MAN_EN) * exchange_rate,
+            "depreciation_jpy": annual_depreciation / MAN_EN,
             "depreciation_twd": (annual_depreciation / MAN_EN) * exchange_rate,
-            "interest_payment_stable_twd": ((loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) / MAN_EN) * exchange_rate,
-            "ebt_stable_twd": (((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - (loan_interest_rate * (loan_amount * 0.9) if loan_amount > 0 else 0) - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
+            "interest_payment_stable_jpy": actual_interest_y2 / MAN_EN,
+            "interest_payment_stable_twd": (actual_interest_y2 / MAN_EN) * exchange_rate,
+            "other_expenses_jpy": ((monthly_management_and_repairs * 12) + (monthly_property_tax * 12) + annual_insurance_cost + annual_tax_accountant_fee) / MAN_EN,
+            "other_expenses_twd": (((monthly_management_and_repairs * 12) + (monthly_property_tax * 12) + annual_insurance_cost + annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
+            "ebt_stable_jpy": (((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - actual_interest_y2 - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN),
+            "ebt_stable_twd": (((monthly_gross_revenue * 12 - monthly_operating_expenses * 12) - annual_depreciation - actual_interest_y2 - (monthly_management_and_repairs * 12) - (monthly_property_tax * 12) - annual_insurance_cost - annual_tax_accountant_fee) / MAN_EN) * exchange_rate,
+            "tax_stable_jpy": annual_tax_y2 / MAN_EN,
             "tax_stable_twd": (annual_tax_y2 / MAN_EN) * exchange_rate,
+            "net_cash_flow_stable_jpy": (cash_flows[2] if len(cash_flows) > 2 else (cash_flows[1] if len(cash_flows) > 1 else 0)) / MAN_EN,
             "net_cash_flow_stable_twd": ((cash_flows[2] if len(cash_flows) > 2 else (cash_flows[1] if len(cash_flows) > 1 else 0)) / MAN_EN) * exchange_rate
         },
         "annual_projections": annual_projections,
@@ -436,4 +518,6 @@ def compute_irr(cash_flows, initial_investment_period=10, tolerance=1e-6, max_it
 if __name__ == '__main__':
     # 在開發環境啟用除錯模式
     debug_mode = ENVIRONMENT == 'development'
-    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', 8080))) 
+    # 本地開發環境預設使用 5001 端口
+    default_port = 5001 if debug_mode else 8080
+    app.run(debug=debug_mode, host='0.0.0.0', port=int(os.environ.get('PORT', default_port))) 
